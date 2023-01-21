@@ -268,12 +268,18 @@ body {
 }
 .viewer-images {
     display: flex;
-    justify-content: center;
 }
 .viewer-logo, .viewer-screenshot {
     max-height: 20rem;
     border: 0.15rem solid #0002;
 }
+.viewer-logo {
+    width: 100%;
+}
+.viewer-screenshot {
+    width: 150%;
+}
+
 .viewer-logo img, .viewer-screenshot img {
     width: 100%;
     height: 100%;
