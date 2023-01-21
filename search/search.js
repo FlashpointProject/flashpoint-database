@@ -1,5 +1,5 @@
 let fpdb = {
-    api: 'http://127.0.0.1:8986',
+    api: 'https://db-api.unstable.life',
     list: [],
     pages: 0,
     currentPage: 1,

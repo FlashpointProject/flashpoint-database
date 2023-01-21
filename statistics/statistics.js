@@ -1,4 +1,4 @@
-fetch('http://127.0.0.1:8986/stats').then(r => r.json()).then(json => {
+fetch('https://db-api.unstable.life/stats').then(r => r.json()).then(json => {
     document.querySelector('.stats-games div:last-child').textContent      = json.libraryTotals[0].count;
     document.querySelector('.stats-animations div:last-child').textContent = json.libraryTotals[1].count;
     
