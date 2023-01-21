@@ -130,6 +130,7 @@ body {
 .common-table :is(td, th) {
     padding: 0.5rem;
     border: 0.15rem solid #0002;
+    overflow-wrap: anywhere;
 }
 .common-table th {
     background-color: #0001;
@@ -292,7 +293,7 @@ body {
     font-family: monospace;
     background-color: #0001;
     padding: 0.1rem 0.5rem;
-    word-break: break-word;
+    word-break: break-all;
 }
 .viewer-file-list span {
     display: block;
