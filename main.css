@@ -1,0 +1,319 @@
+body {
+    font-family: Tahoma, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    width: 100%;
+    height: 3.5rem;
+    font-size: 1.1rem;
+    background-color: #dd0428;
+    box-shadow: 0 0.1rem 0.5rem #0006;
+    display: flex;
+    flex-flow: row nowrap;
+    position: fixed;
+    top: 0;
+    z-index: 1;
+}
+.navbar a {
+    height: 100%;
+    color: #fffd;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 1.1rem 1.1rem 1rem;
+    box-sizing: border-box;
+    transition: color 0.15s, background-color 0.15s;
+}
+.navbar a:hover {
+    color: #ffff;
+    background-color: #e85971;
+}
+.navbar-logo {
+    padding: 0.6rem !important;
+    padding-right: 1rem !important;
+}
+.navbar-logo img {
+    filter: invert(1);
+}
+.navbar-logo span {
+    padding-top: 0.1rem;
+    padding-left: 0.75rem;
+}
+.navbar-right {
+    margin-left: auto;
+}
+
+.content {
+    font-family: Verdana, sans-serif;
+    margin-top: 3rem;
+    padding: 2rem;
+}
+.content a:link, .common-activate {
+    color: #045edd;
+    text-decoration: none;
+}
+.content a:hover, .common-activate:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+.content a:active, .common-activate:active {
+    color: #dd0428;
+    text-decoration: underline;
+}
+.content a:visited {
+    color: #ed687e;
+    text-decoration: none;
+}
+.content input, .content button, .content select {
+    padding: 0.2rem 0.3rem;
+}
+.content input:not([type]), .content input[type="text"] {
+    width: 11rem;
+}
+.content input[type="checkbox"], .content input[type="radio"] {
+    vertical-align: top;
+}
+
+.common-center {
+    max-width: 50rem;
+    margin: 0 auto;
+}
+.common-header {
+    font-family: Tahoma, sans-serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 0.15rem solid #0003;
+}
+.common-subheader {
+    font-family: Tahoma, sans-serif;
+    font-size: 1.7rem;
+    margin: 1rem 0 0.5rem;
+}
+.common-text {
+    margin-bottom: 0.5rem;
+}
+.common-check {
+    padding: 0.2rem 0;
+    display: block;
+}
+.common-loading {
+    font-family: Tahoma, sans-serif;
+    font-size: 1.3rem;
+    text-align: center;
+}
+.common-loading > div {
+    width: 0.8rem;
+    height: 0.8rem;
+    display: inline-block;
+    margin-right: 0.2rem;
+    margin-bottom: 0.2rem;
+    border: 0.15rem solid #000;
+    border-radius: 1rem;
+    vertical-align: bottom;
+    animation: spin 1s linear infinite;
+}
+.common-loading > div > div {
+    width: 0.6rem;
+    height: 0.6rem;
+    background-color: #fff;
+    margin-left: -0.4rem;
+    margin-bottom: 0.3rem;
+}
+.common-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+.common-table :is(td, th) {
+    padding: 0.5rem;
+    border: 0.15rem solid #0002;
+}
+.common-table th {
+    background-color: #0001;
+}
+.common-table :is(td, th):first-child {
+    width: 30%;
+    font-weight: bold;
+}
+.common-table :is(td, th):last-child {
+    width: 70%;
+}
+.common-table ul {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+.search {
+    width: 30rem;
+    height: calc(100% - 3.5rem);
+    padding: 1rem;
+    box-shadow: 0.1rem 0 0.5rem #0006;
+    position: fixed;
+    top: 3.5rem; left: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+.search > .common-header {
+    margin-bottom: 0;
+}
+.search-table {
+    width: 100%;
+    margin-bottom: 1rem;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+.search-table td {
+    padding: 0.5rem 0;
+    border-bottom: 0.15rem solid #0002;
+}
+.search-table td:first-child {
+    width: 40%;
+}
+.search-table td:last-child {
+    width: 60%;
+}
+.search-button {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.meta-tags-list div {
+    margin-top: 0.3rem;
+}
+.meta-tags-list button {
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+}
+.meta-tags-list span {
+    font-size: 0.9rem;
+}
+
+.results {
+    width: calc(100% - 30rem);
+    height: calc(100% - 3.5rem);
+    padding: 1rem;
+    position: fixed;
+    top: 3.5rem; right: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+.results-top {
+    padding-bottom: 0.5rem;
+    border-bottom: 0.15rem solid #0002;
+    justify-content: space-between;
+    align-items: center;
+}
+.results-total {
+    font-weight: bold;
+}
+.results-per-page {
+    font-size: 0.7rem;
+}
+.results-input-page {
+    width: 2rem !important;
+    margin-left: 0.5rem;
+}
+
+.entry {
+    height: 6rem;
+    padding: 1rem 0;
+    border-bottom: 0.15rem solid #0002;
+    display: flex;
+}
+.entry-logo {
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin-right: 0.5rem;
+    flex: 0 0 8rem;
+    cursor: pointer;
+}
+.entry-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+}
+.entry-title {
+    font-family: Tahoma, sans-serif;
+    font-size: 1.5rem;
+}
+.entry-developer {
+    font-size: 0.7rem;
+    margin-left: 0.1rem;
+}
+.entry-type,
+.entry-tags {
+    font-size: 0.9rem;
+}
+.entry-tags {
+    color: #000a;
+}
+.entry-description {
+    margin-top: 0.5rem;
+    white-space: normal;
+}
+
+.viewer {
+    flex-direction: column;
+}
+.viewer-back {
+    margin-right: auto;
+}
+.viewer-images {
+    display: flex;
+    justify-content: center;
+}
+.viewer-logo, .viewer-screenshot {
+    max-height: 20rem;
+    border: 0.15rem solid #0002;
+}
+.viewer-logo img, .viewer-screenshot img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.viewer-add-apps table:not(:first-child) {
+    margin-top: 0.7rem;
+}
+.viewer-file-list {
+    font-family: monospace;
+    background-color: #0001;
+    padding: 0.1rem 0.5rem;
+    word-break: break-word;
+}
+.viewer-file-list span {
+    display: block;
+    margin: 0.3rem 0;
+}
+
+.stats-display {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    column-gap: 2em;
+}
+.stats-total {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 12rem;
+}
+.stats-total div:last-child {
+    font-family: Tahoma, sans-serif;
+    font-size: 2rem;
+}
+.stats-platforms :is(td, th) {
+    width: 100% !important;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

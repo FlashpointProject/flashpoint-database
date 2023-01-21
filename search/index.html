@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Search - Flashpoint Database</title>
+        <link rel="icon" href="../favicon.ico">
+        <link rel="stylesheet" href="../main.css">
+        <script defer src="search.js"></script>
+    </head>
+    <body>
+        <div class="navbar">
+            <a href="../" class="navbar-logo">
+                <img src="../logo.svg" height="100%">
+                <span>Flashpoint Database</span>
+            </a>
+            <a href="../search">Search</a>
+            <a href="../statistics">Statistics</a>
+            <a href="https://github.com/WumboSpasm/flashpoint-database" class="navbar-right">Source Code</a>
+            <a href="https://bluemaxima.org/flashpoint">Back to Home</a>
+        </div>
+        <div class="content">
+            <div class="search">
+                <div class="common-header">Search</div>
+                <table class="search-table">
+                    <tr>
+                        <td>ID:</td>
+                        <td><input class="meta-id"></td>
+                    </tr>
+                    <tr>
+                        <td>Library:</td>
+                        <td>
+                            <div class="meta-library-select">
+                                <div class="common-check"><input type="radio" name="library" value="" id="library-all" checked> <label for="library-all">All</label></div>
+                                <div class="common-check"><input type="radio" name="library" value="arcade" id="library-games"> <label for="library-games">Games</label></div>
+                                <div class="common-check"><input type="radio" name="library" value="theatre" id="library-animations"> <label for="library-animations">Animations</label></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Title:</td>
+                        <td><input class="meta-title"></td>
+                    </tr>
+                    <tr>
+                        <td>Alternate Titles:</td>
+                        <td><input class="meta-alternate-titles"></td>
+                    </tr>
+                    <tr>
+                        <td>Series:</td>
+                        <td><input class="meta-series"></td>
+                    </tr>
+                    <tr>
+                        <td>Developer:</td>
+                        <td><input class="meta-developer"></td>
+                    </tr>
+                    <tr>
+                        <td>Publisher:</td>
+                        <td><input class="meta-publisher"></td>
+                    </tr>
+                    <tr>
+                        <td>Source:</td>
+                        <td><input class="meta-source"></td>
+                    </tr>
+                    <tr>
+                        <td><a href="https://bluemaxima.org/flashpoint/datahub/Tags">Tags:</a></td>
+                        <td>
+                            <input class="meta-tags-input"> <button class="meta-tags-add">Add</button>
+                            <br>
+                            <div class="meta-tags-list"></div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Platform:</td>
+                        <td>
+                            <select class="meta-platform-select">
+                                <option value="">All</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Play Mode:</td>
+                        <td>
+                            <div class="meta-play-mode-select">
+                                <div class="common-check"><input type="checkbox" name="playmode" value="Single Player" id="playmode-singleplayer"> <label for="playmode-singleplayer">Single Player</label></div>
+                                <div class="common-check"><input type="checkbox" name="playmode" value="Multiplayer" id="playmode-multiplayer"> <label for="playmode-multiplayer">Multiplayer</label></div>
+                                <div class="common-check"><input type="checkbox" name="playmode" value="Cooperative" id="playmode-cooperative"> <label for="playmode-cooperative">Cooperative</label></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Status:</td>
+                        <td>
+                            <div class="meta-status-select">
+                                <div class="common-check"><input type="checkbox" name="status" value="Playable" id="status-playable"> <label for="status-playable">Playable</label></div>
+                                <div class="common-check"><input type="checkbox" name="status" value="Hacked" id="status-hacked"> <label for="status-hacked">Hacked</label></div>
+                                <div class="common-check"><input type="checkbox" name="status" value="Partial" id="status-partial"> <label for="status-partial">Partial</label></div>
+                                <div class="common-check"><input type="checkbox" name="status" value="Not Working" id="status-notworking"> <label for="status-notworking">Not Working</label></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Version:</td>
+                        <td><input class="meta-version"></td>
+                    </tr>
+                    <tr>
+                        <td>Release Date:</td>
+                        <td>
+                            <input maxlength="10" placeholder="YYYY-MM-DD" class="meta-release-date">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><a href="https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes">Language:</a></td>
+                        <td><input class="meta-language"></td>
+                    </tr>
+                    <tr>
+                        <td>Format:</td>
+                        <td>
+                            <div class="meta-format-select">
+                                <div class="common-check"><input type="radio" name="format" value="" id="format-any" checked> <label for="format-any">All</label></div>
+                                <div class="common-check"><input type="radio" name="format" value="0" id="format-legacy"> <label for="format-legacy">Legacy</label></div>
+                                <div class="common-check"><input type="radio" name="format" value="1" id="format-gamezip"> <label for="format-gamezip">GameZIP</label></div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <input type="checkbox" class="meta-nsfw-toggle" id="nsfw"> <label for="nsfw">Search NSFW entries</label>
+                <button class="search-button">Search</button>
+            </div>
+            <div class="results">
+                <div class="common-header">Results</div>
+                <div class="common-loading" hidden>
+                    <div><div></div></div>
+                    Loading...
+                </div>
+                <div class="results-top" style="display:none">
+                    <div>Got <span class="results-total"></span> results <span class="results-per-page">(100 per page)</span></div>
+                    <div>
+                        <button class="results-first-page">&#60;&#60;</button>
+                        <button class="results-back-page">&#60;</button>
+                        <span class="results-current-page"></span> / <span class="results-max-pages"></span>
+                        <button class="results-forward-page">&#62;</button>
+                        <button class="results-last-page">&#62;&#62;</button>
+                        
+                        <input type="text" placeholder="#" class="results-input-page">
+                        <button class="results-go-to-page">Go</button>
+                    </div>
+                </div>
+                <div class="results-list" hidden></div>
+                <div class="viewer common-center" style="display:none">
+                    <div class="viewer-back common-activate">&#60; Back to Results</div>
+                    
+                    <div class="common-subheader">Images</div>
+                    <div class="viewer-images">
+                        <fieldset class="viewer-logo">
+                            <legend>Logo</legend>
+                            <img>
+                        </fieldset>
+                        <fieldset class="viewer-screenshot">
+                            <legend>Screenshot</legend>
+                            <img>
+                        </fieldset>
+                    </div>
+                    
+                    <div class="common-subheader">Metadata</div>
+                    <table class="viewer-metadata common-table"></table>
+                    
+                    <div class="common-subheader">Additional Apps</div>
+                    <div class="viewer-no-add-apps">This entry contains no additional apps.</div>
+                    <div class="viewer-add-apps"></div>
+                    
+                    <div class="common-subheader">Files</div>
+                    <div class="viewer-no-file-list" hidden>Cannot display file listing for this entry because it uses the Legacy format.</div>
+                    <div class="viewer-file-list"></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
