@@ -75,6 +75,9 @@ body {
 .content input[type="checkbox"], .content input[type="radio"] {
     vertical-align: top;
 }
+.content input[type="checkbox"] ~ label {
+    margin-right: 1rem;
+}
 
 .common-center {
     max-width: 50rem;
