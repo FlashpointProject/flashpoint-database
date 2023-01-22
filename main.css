@@ -316,8 +316,15 @@ body {
     font-family: Tahoma, sans-serif;
     font-size: 2rem;
 }
+.stats-platforms, .stats-platforms :is(td, th) {
+    width: auto !important;
+}
+.stats-platforms {
+    margin: 1rem auto 0;
+}
 .stats-platforms :is(td, th) {
-    width: 100% !important;
+    text-align: center;
+    padding: 0.5rem 1rem;
 }
 
 @keyframes spin {
