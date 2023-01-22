@@ -58,7 +58,7 @@ function performSearch() {
         platform:         document.querySelector('.meta-platform-select').value,
         playMode:         Array.from(document.querySelectorAll('.meta-play-mode-select input')).filter(elem => elem.checked).map(elem => elem.value).join('&playMode='),
         status:           Array.from(document.querySelectorAll('.meta-status-select input')).filter(elem => elem.checked).map(elem => elem.value).join('&status='),
-        version:          document.querySelector('.meta-source').value,
+        version:          document.querySelector('.meta-version').value,
         releaseDate:      document.querySelector('.meta-release-date').value,
         language:         document.querySelector('.meta-language').value,
         activeDataOnDisk: Array.from(document.querySelectorAll('.meta-format-select input')).find(elem => elem.checked).value,
