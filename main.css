@@ -96,7 +96,7 @@ body {
     margin: 1rem 0 0.5rem;
 }
 .common-text {
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 .common-check {
     padding: 0.2rem 0;
@@ -137,13 +137,6 @@ body {
 }
 .common-table th {
     background-color: #0001;
-}
-.common-table :is(td, th):first-child {
-    width: 30%;
-    font-weight: bold;
-}
-.common-table :is(td, th):last-child {
-    width: 70%;
 }
 .common-table ul {
     margin: 0;
@@ -283,11 +276,17 @@ body {
 .viewer-screenshot {
     width: 150%;
 }
-
 .viewer-logo img, .viewer-screenshot img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+}
+.viewer .common-table :is(td, th):first-child {
+    width: 30%;
+    font-weight: bold;
+}
+.viewer .common-table :is(td, th):last-child {
+    width: 70%;
 }
 .viewer-add-apps table:not(:first-child) {
     margin-top: 0.7rem;
@@ -328,6 +327,29 @@ body {
 .stats-platforms :is(td, th) {
     text-align: center;
     padding: 0.5rem 1rem;
+}
+
+.download-center {
+    max-width: 70rem;
+    margin: 0 auto;
+}
+.download-table :is(td, th) {
+    text-align: center;
+}
+.download-table :is(td, th):nth-child(1) {
+    width: 40%;
+}
+.download-table :is(td, th):is(:nth-child(2), :nth-child(3)) {
+    width: 20%;
+}
+.download-table td:nth-child(3) {
+    font-family: monospace;
+}
+.download-table :is(td, th):nth-child(4) {
+    width: 100%;
+}
+.download-table :is(td, th):nth-child(5) {
+    width: 20%;
 }
 
 @keyframes spin {
