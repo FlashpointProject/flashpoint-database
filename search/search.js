@@ -63,7 +63,7 @@ function performSearch() {
         language:         document.querySelector('.meta-language').value,
         activeDataOnDisk: Array.from(document.querySelectorAll('.meta-format-select input')).find(elem => elem.checked).value,
         filter:           document.querySelector('.meta-nsfw-toggle').checked ? '' : 'true',
-        or:               document.querySelector('.meta-or-mode').checked ? 'true' : ''
+        or:               document.querySelector('.meta-match-any').checked ? 'true' : ''
     };
     
     let params = [];
