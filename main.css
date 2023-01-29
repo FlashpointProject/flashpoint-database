@@ -339,17 +339,14 @@ body {
 .download-table :is(td, th):nth-child(1) {
     width: 40%;
 }
-.download-table :is(td, th):is(:nth-child(2), :nth-child(3)) {
+.download-table :is(td, th):is(:nth-child(2), :nth-child(3), :nth-child(5)) {
     width: 20%;
-}
-.download-table td:nth-child(3) {
-    font-family: monospace;
 }
 .download-table :is(td, th):nth-child(4) {
     width: 100%;
 }
-.download-table :is(td, th):nth-child(5) {
-    width: 20%;
+.download-table td:nth-child(3) {
+    font-family: monospace;
 }
 
 @keyframes spin {
