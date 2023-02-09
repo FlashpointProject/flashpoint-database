@@ -34,6 +34,8 @@ let fpdb = {
     }
 };
 
+document.querySelector('.simple-search input').focus();
+
 fetch(fpdb.api + '/platforms').then(r => r.json()).then(json => {
     for (let platform of json.sort()) {
         let opt = document.createElement('option');
