@@ -44,7 +44,14 @@ fetch(fpdb.api + '/platforms').then(r => r.json()).then(json => {
     }
 });
 
-function performSearch() {
+function simpleSearch() {
+    let query = document.querySelector('.simple-search input').value,
+        filter = document.querySelector('.meta-nsfw-toggle').checked ? '' : 'filter=true&';
+    
+    performQuery(`${filter}or=true&title=${query}&alternateTitles=${query}`);
+}
+
+function advancedSearch() {
     let search = {
         id:               document.querySelector('.meta-id').value,
         library:          Array.from(document.querySelectorAll('.meta-library-select input')).find(elem => elem.checked).value,
@@ -71,12 +78,16 @@ function performSearch() {
         if (search[field] != '')
             params.push(`${field}=${search[field]}`);
     
+    performQuery(params.join('&'));
+}
+
+function performQuery(queryString) {
     document.querySelector('.results-top').style.display = 'none';
     document.querySelector('.results-list').hidden = true;
     document.querySelector('.viewer').style.display = 'none';
     document.querySelector('.results > .common-loading').hidden = false;
     
-    fetch(`${fpdb.api}/search?${params.join('&')}`).then(r => r.json()).then(json => {
+    fetch(`${fpdb.api}/search?${queryString}`).then(r => r.json()).then(json => {
         fpdb.list = json.sort((a, b) => a.title == b.title ? 0 : (a.title > b.title ? 1 : -1));
         pages = Math.ceil(fpdb.list.length / 100);
         
@@ -342,9 +353,25 @@ function addTag() {
     document.querySelector('.meta-tags-input').focus();
 }
 
-document.querySelector('.search-button').addEventListener('click', performSearch);
-document.querySelector('.meta-id').addEventListener('keyup', e => { if (e.key == 'Enter') performSearch(); });
-document.querySelector('.meta-title').addEventListener('keyup', e => { if (e.key == 'Enter') performSearch(); });
+document.querySelector('.mode-select').addEventListener('change', e => {
+    document.querySelector('.simple-search').hidden = e.target.value != 'simple';
+    document.querySelector('.advanced-search').hidden = e.target.value == 'simple';
+    
+    document.querySelector('.meta-match-any').hidden = e.target.value == 'simple';
+    document.querySelector('.meta-match-any ~ label').hidden = e.target.value == 'simple';
+});
+
+document.querySelector('.search-button').addEventListener('click', () => {
+    if (document.querySelector('.advanced-search').hidden)
+        simpleSearch();
+    else
+        advancedSearch();
+});
+
+document.querySelector('.simple-search input').addEventListener('keyup', e => { if (e.key == 'Enter') simpleSearch(); });
+
+document.querySelector('.meta-id').addEventListener('keyup', e => { if (e.key == 'Enter') advancedSearch(); });
+document.querySelector('.meta-title').addEventListener('keyup', e => { if (e.key == 'Enter') advancedSearch(); });
 
 document.querySelector('.meta-tags-add').addEventListener('click', addTag);
 document.querySelector('.meta-tags-input').addEventListener('keyup', e => { if (e.key == 'Enter') addTag(); });

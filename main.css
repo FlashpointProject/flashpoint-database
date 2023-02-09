@@ -96,7 +96,10 @@ body {
     margin: 1rem 0 0.5rem;
 }
 .common-text {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+}
+.common-text + .common-text {
+    margin-top: 1rem;
 }
 .common-check {
     padding: 0.2rem 0;
@@ -154,6 +157,9 @@ body {
     overflow-y: auto;
 }
 .search > .common-header {
+    margin-bottom: 0;
+}
+.search > .search-table {
     margin-bottom: 0;
 }
 .search-table {
