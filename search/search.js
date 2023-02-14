@@ -51,6 +51,13 @@ fetch('fields.json').then(r => r.json()).then(json => {
     });
     
     addField(json[0]);
+    
+    if (localStorage.getItem('query') != null) {
+        document.querySelector('.search-table input').value = localStorage.getItem('query');
+        localStorage.removeItem('query');
+        
+        performSearch();
+    }
 });
 
 function addField(field) {

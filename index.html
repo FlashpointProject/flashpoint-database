@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Search - Flashpoint Database</title>
+        <title>Flashpoint Database</title>
         <link rel="icon" href="favicon.ico">
         <link rel="stylesheet" href="main.css">
+        <script defer src="home.js"></script>
     </head>
     <body>
         <div class="navbar">
@@ -18,9 +19,16 @@
             <a href="https://bluemaxima.org/flashpoint">Back to Home</a>
         </div>
         <div class="content">
-            <div class="common-center">
-                <div class="common-header">Welcome</div>
-                <div class="common-text">This is the Flashpoint database. Use the links at the top to navigate the site.</div>
+            <div class="home-header">
+                <img src="logo.svg" height="100%" class="home-logo">
+                <div class="home-text">
+                    <div class="home-title">Flashpoint Database</div>
+                    <div class="home-subtitle">Search <b class="home-games"></b> games and <b class="home-animations"></b> animations</div>
+                </div>
+            </div>
+            <div class="home-search">
+                <input class="home-search-input" placeholder="Enter search term..." autofocus>
+                <button class="home-search-button">Search</button>
             </div>
         </div>
     </body>
