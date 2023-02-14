@@ -1,0 +1,130 @@
+[
+  {
+    "name": "smartSearch",
+    "displayName": "Smart Search",
+    "values": []
+  },
+  {
+    "name": "title",
+    "displayName": "Title",
+    "values": []
+  },
+  {
+    "name": "alternateTitles",
+    "displayName": "Alternate Title",
+    "values": []
+  },
+  {
+    "name": "developer",
+    "displayName": "Developer",
+    "values": []
+  },
+  {
+    "name": "publisher",
+    "displayName": "Publisher",
+    "values": []
+  },
+  {
+    "name": "source",
+    "displayName": "Source",
+    "values": []
+  },
+  {
+    "name": "library",
+    "displayName": "Library",
+    "values": [
+      {
+        "name": "arcade",
+        "displayName": "Games"
+      },
+      {
+        "name": "theatre",
+        "displayName": "Animations"
+      }
+    ]
+  },
+  {
+    "name": "tagsStr",
+    "displayName": "Tag",
+    "values": []
+  },
+  {
+    "name": "platform",
+    "displayName": "Platform",
+    "values": []
+  },
+  {
+    "name": "playMode",
+    "displayName": "Play Mode",
+    "values": [
+      {
+        "name": "Single Player",
+        "displayName": "Single Player"
+      },
+      {
+        "name": "Multiplayer",
+        "displayName": "Multiplayer"
+      },
+      {
+        "name": "Cooperative",
+        "displayName": "Cooperative"
+      }
+    ]
+  },
+  {
+    "name": "status",
+    "displayName": "Status",
+    "values": [
+      {
+        "name": "Playable",
+        "displayName": "Playable"
+      },
+      {
+        "name": "Hacked",
+        "displayName": "Hacked"
+      },
+      {
+        "name": "Partial",
+        "displayName": "Partial"
+      },
+      {
+        "name": "Not Working",
+        "displayName": "Not Working"
+      }
+    ]
+  },
+  {
+    "name": "version",
+    "displayName": "Version",
+    "values": []
+  },
+  {
+    "name": "releaseDate",
+    "displayName": "Release Date",
+    "values": []
+  },
+  {
+    "name": "language",
+    "displayName": "Language",
+    "values": []
+  },
+  {
+    "name": "activeDataOnDisk",
+    "displayName": "Format",
+    "values": [
+      {
+        "name": "1",
+        "displayName": "GameZIP"
+      },
+      {
+        "name": "0",
+        "displayName": "Legacy"
+      }
+    ]
+  },
+  {
+    "name": "id",
+    "displayName": "ID",
+    "values": []
+  }
+]

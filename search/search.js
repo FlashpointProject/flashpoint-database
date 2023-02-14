@@ -1,5 +1,6 @@
 let fpdb = {
-    api: 'https://db-api.unstable.life',
+    api: 'http://127.0.0.1:8986',
+    platforms: [],
     list: [],
     pages: 0,
     currentPage: 1,
@@ -34,62 +35,87 @@ let fpdb = {
     }
 };
 
-document.querySelector('.simple-search input').focus();
+fetch(fpdb.api + '/platforms').then(r => r.json()).then(json => { fpdb.platforms = json; });
 
-fetch(fpdb.api + '/platforms').then(r => r.json()).then(json => {
-    for (let platform of json.sort()) {
+fetch('fields.json').then(r => r.json()).then(json => {
+    for (let field of json) {
         let opt = document.createElement('option');
-        opt.value = platform;
-        opt.innerText = platform;
+        opt.value = field.name;
+        opt.innerText = field.displayName;
         
-        document.querySelector('.meta-platform-select').append(opt);
+        document.querySelector('.search-fields-list').append(opt);
     }
+    
+    document.querySelector('.search-fields-add').addEventListener('click', () => {
+        addField(json.find(field => field.name == document.querySelector('.search-fields-list').value));
+    });
+    
+    addField(json[0]);
 });
 
-function simpleSearch() {
-    let query = document.querySelector('.simple-search input').value,
-        filter = document.querySelector('.meta-nsfw-toggle').checked ? '' : 'filter=true&';
+function addField(field) {
+    let row   = document.createElement('tr'),
+        name  = document.createElement('td'),
+        value = document.createElement('td'),
+        del   = document.createElement('button');
     
-    performQuery(`${filter}or=true&title=${query}&alternateTitles=${query}`);
+    del.innerText = 'X';
+    del.addEventListener('click', () => { row.remove() });
+    name.append(del, field.displayName + ':');
+    
+    if (field.name == 'platform')
+        field.values = fpdb.platforms.map(platform => ({ name: platform, displayName: platform }));
+    
+    if (field.values.length > 0) {
+        let input = document.createElement('select');
+        input.id = field.name;
+        
+        for (let value of field.values) {
+            let opt = document.createElement('option');
+            opt.value = value.name;
+            opt.innerText = value.displayName;
+            
+            input.append(opt);
+        }
+        
+        value.append(input);
+    } else {
+        let input = document.createElement('input');
+        input.id = field.name;
+        input.addEventListener('keyup', e => { if (e.key == 'Enter') performSearch(); });
+        
+        value.append(input);
+    }
+    
+    row.append(name, value);
+    document.querySelector('.search-table').append(row);
+    
+    document.querySelectorAll('.search-table tr:last-child input').forEach(input => { input.focus(); });
 }
 
-function advancedSearch() {
-    let search = {
-        id:               document.querySelector('.meta-id').value,
-        library:          Array.from(document.querySelectorAll('.meta-library-select input')).find(elem => elem.checked).value,
-        title:            document.querySelector('.meta-title').value,
-        alternateTitles:  document.querySelector('.meta-alternate-titles').value,
-        series:           document.querySelector('.meta-series').value,
-        developer:        document.querySelector('.meta-developer').value,
-        publisher:        document.querySelector('.meta-publisher').value,
-        source:           document.querySelector('.meta-source').value,
-        tags:             Array.from(document.querySelectorAll('.meta-tags-list span'), elem => elem.textContent).join(','),
-        platform:         document.querySelector('.meta-platform-select').value,
-        playMode:         Array.from(document.querySelectorAll('.meta-play-mode-select input')).filter(elem => elem.checked).map(elem => elem.value).join('&playMode='),
-        status:           Array.from(document.querySelectorAll('.meta-status-select input')).filter(elem => elem.checked).map(elem => elem.value).join('&status='),
-        version:          document.querySelector('.meta-version').value,
-        releaseDate:      document.querySelector('.meta-release-date').value,
-        language:         document.querySelector('.meta-language').value,
-        activeDataOnDisk: Array.from(document.querySelectorAll('.meta-format-select input')).find(elem => elem.checked).value,
-        filter:           document.querySelector('.meta-nsfw-toggle').checked ? '' : 'true',
-        or:               document.querySelector('.meta-match-any').checked ? 'true' : ''
-    };
+function performSearch() {
+    let fields = {},
+        params = [];
     
-    let params = [];
-    for (let field in search)
-        if (search[field] != '')
-            params.push(`${field}=${search[field]}`);
+    document.querySelectorAll('.search-table [id]').forEach(field => {
+        if (field.id in fields)
+            fields[field.id] += ',' + field.value;
+        else
+            fields[field.id] = field.value;
+    });
     
-    performQuery(params.join('&'));
-}
-
-function performQuery(queryString) {
+    for (let field in fields)
+        params.push(`${field}=${fields[field]}`);
+    
+    if (document.querySelector('#filter').checked) params.push('filter=true');
+    if (document.querySelector('#any').checked) params.push('any=true');
+    
     document.querySelector('.results-top').style.display = 'none';
     document.querySelector('.results-list').hidden = true;
     document.querySelector('.viewer').style.display = 'none';
     document.querySelector('.results > .common-loading').hidden = false;
     
-    fetch(`${fpdb.api}/search?${queryString}`).then(r => r.json()).then(json => {
+    fetch(`${fpdb.api}/search?${params.join('&')}`).then(r => r.json()).then(json => {
         fpdb.list = json.sort((a, b) => a.title == b.title ? 0 : (a.title > b.title ? 1 : -1));
         pages = Math.ceil(fpdb.list.length / 100);
         
@@ -165,19 +191,10 @@ function loadPage(page) {
             description.style.fontStyle = 'italic';
         }
         
-        header.append(title);
-        header.append(developer);
-        
-        subHeader.append(type);
-        subHeader.append(tags);
-        
-        text.append(header);
-        text.append(subHeader);
-        text.append(description);
-        
-        entry.append(logo);
-        entry.append(text);
-        
+        header.append(title, developer);
+        subHeader.append(type, tags);
+        text.append(header, subHeader, description);
+        entry.append(logo, text);
         htmlList.append(entry);
     }
 }
@@ -265,8 +282,7 @@ async function loadEntry(e) {
                     fieldValue.textContent = fpdb.list[i][field];
             }
             
-            row.append(fieldName);
-            row.append(fieldValue);
+            row.append(fieldName, fieldValue);
             metaTable.append(row);
         }
     }
@@ -288,8 +304,7 @@ async function loadEntry(e) {
                 fieldName.textContent  = fpdb.addAppMap[field] + ':';
                 fieldValue.textContent = app[field];
                 
-                row.append(fieldName);
-                row.append(fieldValue);
+                row.append(fieldName, fieldValue);
                 table.append(row);
             }
             
@@ -334,49 +349,7 @@ function backToResults() {
     document.querySelector('.results-list').hidden = false;
 }
 
-function addTag() {
-    let value = document.querySelector('.meta-tags-input').value;
-    if (value == '') return;
-    
-    let container    = document.createElement('div'),
-        deleteButton = document.createElement('button'),
-        valueElement = document.createElement('span');
-    
-    deleteButton.innerText = 'X';
-    deleteButton.addEventListener('click', e => event.target.parentNode.remove());
-    
-    valueElement.innerText = value;
-    
-    container.append(deleteButton);
-    container.append(valueElement);
-    
-    document.querySelector('.meta-tags-list').append(container);
-    document.querySelector('.meta-tags-input').value = '';
-    document.querySelector('.meta-tags-input').focus();
-}
-
-document.querySelector('.mode-select').addEventListener('change', e => {
-    document.querySelector('.simple-search').hidden = e.target.value != 'simple';
-    document.querySelector('.advanced-search').hidden = e.target.value == 'simple';
-    
-    document.querySelector('.meta-match-any').hidden = e.target.value == 'simple';
-    document.querySelector('.meta-match-any ~ label').hidden = e.target.value == 'simple';
-});
-
-document.querySelector('.search-button').addEventListener('click', () => {
-    if (document.querySelector('.advanced-search').hidden)
-        simpleSearch();
-    else
-        advancedSearch();
-});
-
-document.querySelector('.simple-search input').addEventListener('keyup', e => { if (e.key == 'Enter') simpleSearch(); });
-
-document.querySelector('.meta-id').addEventListener('keyup', e => { if (e.key == 'Enter') advancedSearch(); });
-document.querySelector('.meta-title').addEventListener('keyup', e => { if (e.key == 'Enter') advancedSearch(); });
-
-document.querySelector('.meta-tags-add').addEventListener('click', addTag);
-document.querySelector('.meta-tags-input').addEventListener('keyup', e => { if (e.key == 'Enter') addTag(); });
+document.querySelector('.search-button').addEventListener('click', performSearch);
 
 document.querySelector('.results-first-page').addEventListener('click', () => { if (currentPage > 1) loadPage(1); });
 document.querySelector('.results-back-page').addEventListener('click', () => { if (currentPage > 1) loadPage(currentPage - 1); });
