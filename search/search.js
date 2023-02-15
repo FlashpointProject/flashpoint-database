@@ -128,8 +128,8 @@ function performSearch() {
         
         loadPage(1);
         
-        document.querySelector('.results-total').textContent = fpdb.list.length;
-        document.querySelector('.results-max-pages').textContent = pages;
+        document.querySelector('.results-total').textContent = fpdb.list.length.toLocaleString();
+        document.querySelector('.results-max-pages').textContent = pages.toLocaleString();
         
         document.querySelector('.results > .common-loading').hidden = true;
         document.querySelector('.results-top').style.display = 'flex';
@@ -143,7 +143,7 @@ function loadPage(page) {
         htmlList.removeChild(htmlList.firstChild);
     
     currentPage = page;
-    document.querySelector('.results-current-page').textContent = currentPage;
+    document.querySelector('.results-current-page').textContent = currentPage.toLocaleString();
     
     for (let i = (page - 1) * 100; i < Math.min(fpdb.list.length, page * 100); i++) {
         let entry = document.createElement('div')
