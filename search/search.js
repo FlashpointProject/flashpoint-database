@@ -1,5 +1,5 @@
 let fpdb = {
-    api: 'https://db-api.unstable.life',
+    api: location.origin == 'http://localhost' ? 'http://127.0.0.1:8986' : 'https://db-api.unstable.life',
     platforms: [],
     list: [],
     pages: 0,
