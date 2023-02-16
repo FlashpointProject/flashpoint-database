@@ -5,7 +5,7 @@ fetch('https://db-api.unstable.life/stats').then(r => r.json()).then(json => {
 
 function initializeSearch() {
     localStorage.setItem('query', document.querySelector('.home-search-input').value);
-    location.replace('search');
+    location.href = 'search';
 }
 
 document.querySelector('.home-search-input').addEventListener('keyup', e => { if (e.key == 'Enter') initializeSearch(); });
