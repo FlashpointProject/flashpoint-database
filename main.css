@@ -254,6 +254,10 @@ body {
     width: 2rem !important;
     margin-left: 0.5rem;
 }
+.results-bottom {
+    text-align: right;
+    margin-top: 0.5rem;
+}
 
 .entry {
     height: 6rem;

@@ -38,7 +38,7 @@
                 </div>
                 <div class="results-top" style="display:none">
                     <div>Got <span class="results-total"></span> results <span class="results-per-page">(100 per page)</span></div>
-                    <div>
+                    <div class="results-navigate">
                         <button class="results-first-page">&#60;&#60;</button>
                         <button class="results-back-page">&#60;</button>
                         <span class="results-current-page"></span> / <span class="results-max-pages"></span>
@@ -50,6 +50,16 @@
                     </div>
                 </div>
                 <div class="results-list" hidden></div>
+                <div class="results-bottom results-navigate" hidden>
+                    <button class="results-first-page">&#60;&#60;</button>
+                    <button class="results-back-page">&#60;</button>
+                    <span class="results-current-page"></span> / <span class="results-max-pages"></span>
+                    <button class="results-forward-page">&#62;</button>
+                    <button class="results-last-page">&#62;&#62;</button>
+                    
+                    <input type="text" placeholder="#" class="results-input-page">
+                    <button class="results-go-to-page">Go</button>
+                </div>
                 <div class="viewer common-center" style="display:none">
                     <div class="viewer-back common-activate">&#60; Back to Results</div>
                     

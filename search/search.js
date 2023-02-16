@@ -4,6 +4,7 @@ let fpdb = {
     list: [],
     pages: 0,
     currentPage: 1,
+    lastScrollPos: 0,
     metaMap: {
         title:               "Title",
         alternateTitles:     "Alternate Titles",
@@ -119,6 +120,7 @@ function performSearch() {
     
     document.querySelector('.results-top').style.display = 'none';
     document.querySelector('.results-list').hidden = true;
+    document.querySelector('.results-bottom').hidden = true;
     document.querySelector('.viewer').style.display = 'none';
     document.querySelector('.results > .common-loading').hidden = false;
     
@@ -126,14 +128,15 @@ function performSearch() {
         fpdb.list = json.sort((a, b) => a.title == b.title ? 0 : (a.title > b.title ? 1 : -1));
         pages = Math.ceil(fpdb.list.length / 100);
         
-        loadPage(1);
-        
         document.querySelector('.results-total').textContent = fpdb.list.length.toLocaleString();
-        document.querySelector('.results-max-pages').textContent = pages.toLocaleString();
+        document.querySelectorAll('.results-max-pages').forEach(elem => { elem.textContent = pages.toLocaleString(); });
         
         document.querySelector('.results > .common-loading').hidden = true;
         document.querySelector('.results-top').style.display = 'flex';
         document.querySelector('.results-list').hidden = false;
+        document.querySelectorAll('.results-navigate').forEach(elem => { elem.hidden = pages < 2; });
+        
+        loadPage(1);
     });
 }
 
@@ -143,7 +146,8 @@ function loadPage(page) {
         htmlList.removeChild(htmlList.firstChild);
     
     currentPage = page;
-    document.querySelector('.results-current-page').textContent = currentPage.toLocaleString();
+    document.querySelectorAll('.results-current-page').forEach(elem => { elem.textContent = currentPage.toLocaleString(); });
+    document.querySelector('.results').scrollTop = 0;
     
     for (let i = (page - 1) * 100; i < Math.min(fpdb.list.length, page * 100); i++) {
         let entry = document.createElement('div')
@@ -206,12 +210,12 @@ function loadPage(page) {
     }
 }
 
-function loadPageFromInput() {
-    let value = parseInt(document.querySelector('.results-input-page').value, 10);
+function loadPageFromInput(input) {
+    let value = parseInt(input.value, 10);
     
     if (!isNaN(value) && value != currentPage && value > 0 && value <= pages) {
         loadPage(value);
-        document.querySelector('.results-input-page').value = '';
+        input.value = '';
     }
 }
 
@@ -219,8 +223,11 @@ async function loadEntry(e) {
     let i = parseInt(e.target.getAttribute('view'));
     if (isNaN(i)) return;
     
+    fpdb.lastScrollPos = document.querySelector('.results').scrollTop;
+    
     document.querySelector('.results-top').style.display = 'none';
     document.querySelector('.results-list').hidden = true;
+    document.querySelector('.results-bottom').hidden = true;
     document.querySelector('.results > .common-loading').hidden = false;
     
     let requests = [
@@ -354,16 +361,18 @@ function backToResults() {
     document.querySelector('.viewer').style.display = 'none';
     document.querySelector('.results-top').style.display = 'flex';
     document.querySelector('.results-list').hidden = false;
+    document.querySelector('.results-bottom').hidden = false;
+    document.querySelector('.results').scrollTop = fpdb.lastScrollPos;
 }
 
 document.querySelector('.search-button').addEventListener('click', performSearch);
 
-document.querySelector('.results-first-page').addEventListener('click', () => { if (currentPage > 1) loadPage(1); });
-document.querySelector('.results-back-page').addEventListener('click', () => { if (currentPage > 1) loadPage(currentPage - 1); });
-document.querySelector('.results-forward-page').addEventListener('click', () => { if (currentPage < pages) loadPage(currentPage + 1); });
-document.querySelector('.results-last-page').addEventListener('click', () => { if (currentPage < pages) loadPage(pages); });
+document.querySelectorAll('.results-first-page').forEach(elem => elem.addEventListener('click', () => { if (currentPage > 1) loadPage(1); }));
+document.querySelectorAll('.results-back-page').forEach(elem => elem.addEventListener('click', () => { if (currentPage > 1) loadPage(currentPage - 1); }));
+document.querySelectorAll('.results-forward-page').forEach(elem => elem.addEventListener('click', () => { if (currentPage < pages) loadPage(currentPage + 1); }));
+document.querySelectorAll('.results-last-page').forEach(elem => elem.addEventListener('click', () => { if (currentPage < pages) loadPage(pages); }));
 
-document.querySelector('.results-go-to-page').addEventListener('click', loadPageFromInput);
-document.querySelector('.results-input-page').addEventListener('keyup', e => { if (e.key == 'Enter') loadPageFromInput(); });
+document.querySelectorAll('.results-go-to-page').forEach((elem, i) => elem.addEventListener('click', () => loadPageFromInput(document.querySelectorAll('.results-input-page')[i])));
+document.querySelectorAll('.results-input-page').forEach(elem => elem.addEventListener('keyup', e => { if (e.key == 'Enter') loadPageFromInput(e.target); }));
 
 document.querySelector('.viewer-back').addEventListener('click', backToResults);
