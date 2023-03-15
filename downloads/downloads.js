@@ -11,7 +11,6 @@ fetch(`${downloadRoot}/info.json`).then(r => r.json()).then(json => {
             let row = document.createElement('tr'),
                 entryName = document.createElement('td'),
                 entrySize = document.createElement('td'),
-                entryPath = document.createElement('td'),
                 entryDownload = document.createElement('td'),
                 entryDownloadLink = document.createElement('a'),
                 entryHash = document.createElement('td'),
@@ -19,7 +18,6 @@ fetch(`${downloadRoot}/info.json`).then(r => r.json()).then(json => {
             
             entryName.textContent = entry.name
             entrySize.textContent = formatBytes(entry.size);
-            entryPath.textContent = entry.path;
             
             entryDownloadLink.textContent = entry.file;
             entryDownloadLink.href = `${downloadRoot}/${entry.file}`;
@@ -32,7 +30,6 @@ fetch(`${downloadRoot}/info.json`).then(r => r.json()).then(json => {
             
             row.append(entryName);
             row.append(entrySize);
-            row.append(entryPath);
             row.append(entryDownload);
             row.append(entryHash);
             
