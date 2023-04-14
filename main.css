@@ -347,6 +347,23 @@ body {
     margin: 0.3rem 0;
 }
 
+.download-center {
+    max-width: 70rem;
+    margin: 0 auto;
+}
+.download-table :is(td, th) {
+    text-align: center;
+}
+.download-table :is(td, th):nth-child(1) {
+    width: 40%;
+}
+.download-table :is(td, th):is(:nth-child(2), :nth-child(4)) {
+    width: 20%;
+}
+.download-table :is(td, th):nth-child(3) {
+    width: 100%;
+}
+
 .stats-display {
     margin-top: 1rem;
     display: flex;
@@ -372,23 +389,6 @@ body {
 .stats-platforms :is(td, th) {
     text-align: center;
     padding: 0.5rem 1rem;
-}
-
-.download-center {
-    max-width: 70rem;
-    margin: 0 auto;
-}
-.download-table :is(td, th) {
-    text-align: center;
-}
-.download-table :is(td, th):nth-child(1) {
-    width: 40%;
-}
-.download-table :is(td, th):is(:nth-child(2), :nth-child(4)) {
-    width: 20%;
-}
-.download-table :is(td, th):nth-child(3) {
-    width: 100%;
 }
 
 @keyframes spin {

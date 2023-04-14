@@ -1,12 +1,17 @@
-let downloadRoot = '.';
+let downloadTables = [
+    'platforms',
+    'platformsNsfw',
+    'platformImages',
+    'platformImagesNsfw',
+    'other'
+];
 
-fetch(`${downloadRoot}/info.json`).then(r => r.json()).then(json => {
+fetch('info.json').then(r => r.json()).then(json => {
     document.querySelector('.download-compressed-size').textContent   = formatBytes(json.compressedSize);
     document.querySelector('.download-uncompressed-size').textContent = formatBytes(json.uncompressedSize);
+    document.querySelector('.download-torrent').href = json.torrentFile;
     
-    for (let table in json) {
-        if (table == 'compressedSize' || table == 'uncompressedSize') continue;
-        
+    for (let table of downloadTables) {
         for (let entry of json[table]) {
             let row = document.createElement('tr'),
                 entryName = document.createElement('td'),
@@ -20,7 +25,7 @@ fetch(`${downloadRoot}/info.json`).then(r => r.json()).then(json => {
             entrySize.textContent = formatBytes(entry.size);
             
             entryDownloadLink.textContent = entry.file;
-            entryDownloadLink.href = `${downloadRoot}/${entry.file}`;
+            entryDownloadLink.href = `${json.zipDirectory}/${entry.file}`;
             entryDownload.append(entryDownloadLink);
             
             entryHashCopy.textContent = 'Copy';
@@ -33,12 +38,7 @@ fetch(`${downloadRoot}/info.json`).then(r => r.json()).then(json => {
             row.append(entryDownload);
             row.append(entryHash);
             
-            try {
-                document.getElementById(table).append(row);
-            }
-            catch {
-                document.getElementById('other').append(row);
-            }
+            document.getElementById(table).append(row);
         }
     }
 });
