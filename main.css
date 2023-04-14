@@ -216,10 +216,10 @@ body {
     border-bottom: 0.15rem solid #0002;
 }
 .search-table td:first-child {
-    width: 40%;
+    width: 45%;
 }
 .search-table td:last-child {
-    width: 60%;
+    width: auto;
 }
 .search-table button {
     margin-right: 0.5rem;

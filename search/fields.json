@@ -109,6 +109,16 @@
     "values": []
   },
   {
+    "name": "applicationPath",
+    "displayName": "Application Path",
+    "values": []
+  },
+  {
+    "name": "launchCommand",
+    "displayName": "Launch Command",
+    "values": []
+  },
+  {
     "name": "activeDataOnDisk",
     "displayName": "Format",
     "values": [
