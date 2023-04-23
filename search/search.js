@@ -361,7 +361,7 @@ function backToResults() {
     document.querySelector('.viewer').style.display = 'none';
     document.querySelector('.results-top').style.display = 'flex';
     document.querySelector('.results-list').hidden = false;
-    document.querySelector('.results-bottom').hidden = false;
+    document.querySelector('.results-bottom').hidden = pages < 2;
     document.querySelector('.results').scrollTop = fpdb.lastScrollPos;
 }
 
