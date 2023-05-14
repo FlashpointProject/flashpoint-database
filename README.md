@@ -1,5 +1,5 @@
 # Flashpoint Database
-This is a pure HTML5 frontend for the [Flashpoint API](https://github.com/WumboSpasm/flashpoint-api).
+This is a pure HTML5 frontend for the [Flashpoint API](https://github.com/FlashpointProject/flashpoint-database-api).
 
 ## Features
 * Advanced database searching
