@@ -4,6 +4,7 @@ let fpdb = {
     list: [],
     pages: 0,
     currentPage: 1,
+    currentEntry: 0,
     lastScrollPos: 0,
     metaMap: {
         title:               "Title",
@@ -38,7 +39,7 @@ let fpdb = {
 
 fetch(fpdb.api + '/platforms').then(r => r.json()).then(json => { fpdb.platforms = json; });
 
-fetch('fields.json').then(r => r.json()).then(json => {
+fetch('fields.json').then(r => r.json()).then(async json => {
     for (let field of json) {
         let opt = document.createElement('option');
         opt.value = field.name;
@@ -58,6 +59,10 @@ fetch('fields.json').then(r => r.json()).then(json => {
         localStorage.removeItem('query');
         
         performSearch();
+    }
+    else if (location.hash.length == 37) {
+        fpdb.list = await fetch(`${fpdb.api}/search?id=${location.hash.substring(1)}`).then(r => r.json());
+        if (fpdb.list.length > 0) loadEntry();
     }
 });
 
@@ -102,6 +107,8 @@ function addField(field) {
 }
 
 function performSearch() {
+    history.pushState('', '', location.pathname);
+    
     let fields = {},
         params = [];
     
@@ -225,10 +232,22 @@ function loadPageFromInput(input) {
 }
 
 async function loadEntry(e) {
-    let i = parseInt(e.target.getAttribute('view'));
-    if (isNaN(i)) return;
+    let i = 0;
     
+    if (e != undefined) {
+        i = parseInt(e.target.getAttribute('view'));
+        if (isNaN(i)) return;
+        document.querySelector('.viewer-header').hidden = false;
+    }
+    else if (fpdb.list.length > 0) {
+        document.querySelector('.viewer-header').hidden = true;
+    }
+    else return;
+    
+    fpdb.currentEntry = i;
     fpdb.lastScrollPos = document.querySelector('.results').scrollTop;
+    
+    let entry = fpdb.list[fpdb.currentEntry];
     
     document.querySelector('.results-top').style.display = 'none';
     document.querySelector('.results-list').hidden = true;
@@ -236,10 +255,10 @@ async function loadEntry(e) {
     document.querySelector('.results > .common-loading').hidden = false;
     
     let requests = [
-        `${fpdb.api}/logo?id=${fpdb.list[i].id}`,
-        `${fpdb.api}/screenshot?id=${fpdb.list[i].id}`,
-        `${fpdb.api}/addapps?id=${fpdb.list[i].id}`,
-        `${fpdb.api}/files?id=${fpdb.list[i].id}`,
+        `${fpdb.api}/logo?id=${entry.id}`,
+        `${fpdb.api}/screenshot?id=${entry.id}`,
+        `${fpdb.api}/addapps?id=${entry.id}`,
+        `${fpdb.api}/files?id=${entry.id}`,
     ];
     
     let responses = [];
@@ -260,7 +279,7 @@ async function loadEntry(e) {
         metaTable.removeChild(metaTable.firstChild);
     
     for (let field in fpdb.metaMap) {
-        if (fpdb.list[i][field].length > 0 || typeof(fpdb.list[i][field]) == 'boolean') {
+        if (entry[field].length > 0 || typeof(entry[field]) == 'boolean') {
             let row = document.createElement('tr'),
                 fieldName  = document.createElement('td'),
                 fieldValue = document.createElement('td');
@@ -269,13 +288,13 @@ async function loadEntry(e) {
             
             switch (field) {
                 case 'library':
-                    fieldValue.textContent = fpdb.list[i][field] == 'arcade'
+                    fieldValue.textContent = entry[field] == 'arcade'
                         ? 'Games'
                         : 'Animations';
                     break;
                 case 'tags':
                     let ul = document.createElement('ul');
-                    for (let tag of fpdb.list[i].tags) {
+                    for (let tag of entry.tags) {
                         let li = document.createElement('li');
                         li.textContent = tag;
                         ul.append(li);
@@ -283,14 +302,14 @@ async function loadEntry(e) {
                     fieldValue.append(ul);
                     break;
                 case 'releaseDate':
-                    fieldValue.textContent = new Date(fpdb.list[i][field]).toLocaleDateString(undefined, { timeZone: 'UTC' });
+                    fieldValue.textContent = new Date(entry[field]).toLocaleDateString(undefined, { timeZone: 'UTC' });
                     break;
                 case 'dateAdded':
                 case 'dateModified':
-                    fieldValue.textContent = new Date(fpdb.list[i][field]).toLocaleString();
+                    fieldValue.textContent = new Date(entry[field]).toLocaleString();
                     break;
                 case 'zipped':
-                    fieldValue.textContent = fpdb.list[i][field]
+                    fieldValue.textContent = entry[field]
                         ? "GameZIP"
                         : "Legacy";
                     break;
@@ -298,7 +317,7 @@ async function loadEntry(e) {
                 case 'originalDescription':
                     fieldValue.style.whiteSpace = 'pre-wrap';
                 default:
-                    fieldValue.textContent = fpdb.list[i][field];
+                    fieldValue.textContent = entry[field];
             }
             
             row.append(fieldName, fieldValue);
@@ -339,7 +358,7 @@ async function loadEntry(e) {
     }
     
     let fileList = document.querySelector('.viewer-file-list');
-    if (fpdb.list[i].zipped) {
+    if (entry.zipped) {
         while (fileList.firstChild)
             fileList.removeChild(fileList.firstChild);
         
@@ -381,3 +400,4 @@ document.querySelectorAll('.results-go-to-page').forEach((elem, i) => elem.addEv
 document.querySelectorAll('.results-input-page').forEach(elem => elem.addEventListener('keyup', e => { if (e.key == 'Enter') loadPageFromInput(e.target); }));
 
 document.querySelector('.viewer-back').addEventListener('click', backToResults);
+document.querySelector('.viewer-copy').addEventListener('click', () => navigator.clipboard.writeText(location.href + '#' + fpdb.list[fpdb.currentEntry].id));

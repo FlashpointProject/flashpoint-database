@@ -306,7 +306,10 @@ body {
     flex-direction: column;
 }
 .viewer-back {
-    margin-right: auto;
+    float: left;
+}
+.viewer-copy {
+    float: right;
 }
 .viewer-images {
     display: flex;
