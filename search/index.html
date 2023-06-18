@@ -37,7 +37,17 @@
                     Loading...
                 </div>
                 <div class="results-top" style="display:none">
-                    <div>Got <span class="results-total"></span> results <span class="results-per-page">(100 per page)</span></div>
+                    <div class="results-count">
+                        Got <span class="results-total"></span> results <span class="results-per-page">(100 per page)</span>
+                    </div>
+                    <div class="results-sort">
+                        Sort:
+                        <select class="results-sort-options"></select>
+                        <select class="results-sort-direction">
+                            <option selected>Ascending</option>
+                            <option>Descending</option>
+                        </select>
+                    </div>
                     <div class="results-navigate">
                         <button class="results-first-page">&#60;&#60;</button>
                         <button class="results-back-page">&#60;</button>
@@ -63,8 +73,8 @@
                 <div class="viewer common-center" style="display:none">
                     <div class="viewer-header">
                         <div class="viewer-back common-activate">&#60; Back to Results</div>
-                        <div class="viewer-open common-activate">Open in Flashpoint</div>
                         <div class="viewer-copy common-activate">Copy link</div>
+                        <div class="viewer-open common-activate">Open in Flashpoint</div>
                     </div>
                     
                     <div class="common-subheader">Images</div>

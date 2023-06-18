@@ -1,6 +1,7 @@
 let fpdb = {
     api: location.origin == 'http://localhost' ? 'http://127.0.0.1:8986' : 'https://db-api.unstable.life',
     platforms: [],
+    sortOptions: [],
     list: [],
     pages: 0,
     currentPage: 1,
@@ -64,6 +65,25 @@ fetch('fields.json').then(r => r.json()).then(async json => {
         fpdb.list = await fetch(`${fpdb.api}/search?id=${location.hash.substring(1)}`).then(r => r.json());
         if (fpdb.list.length > 0) loadEntry();
     }
+});
+
+fetch('sort.json').then(r => r.json()).then(json => {
+    fpdb.sortOptions = json;
+    
+    let options = document.querySelector('.results-sort-options'),
+        direction = document.querySelector('.results-sort-direction');
+    
+    for (let sort of json) {
+        let opt = document.createElement('option');
+        opt.value = sort.name;
+        opt.innerText = sort.displayName;
+        
+        if (sort.name == 'title') opt.selected = true;
+        
+        document.querySelector('.results-sort-options').append(opt);
+    }
+    
+    document.querySelectorAll('.results-sort > select').forEach(elem => elem.addEventListener('change', applySort));
 });
 
 function addField(field) {
@@ -137,7 +157,7 @@ function performSearch() {
     document.querySelector('.results > .common-loading').hidden = false;
     
     fetch(`${fpdb.api}/search?${params.join('&')}`).then(r => r.json()).then(json => {
-        fpdb.list = json.sort((a, b) => a.title == b.title ? 0 : (a.title > b.title ? 1 : -1));
+        fpdb.list = json;
         pages = Math.ceil(fpdb.list.length / 100);
         
         document.querySelector('.results-total').textContent = fpdb.list.length.toLocaleString();
@@ -148,8 +168,24 @@ function performSearch() {
         document.querySelector('.results-list').hidden = false;
         document.querySelectorAll('.results-navigate').forEach(elem => { elem.hidden = pages < 2; });
         
-        loadPage(1);
+        applySort();
     });
+}
+
+function applySort() {
+    let fields = fpdb.sortOptions[document.querySelector('.results-sort-options').selectedIndex].fields,
+        direction = document.querySelector('.results-sort-direction').selectedIndex == 0 ? 1 : -1;
+    
+    fpdb.list = fpdb.list.sort((a, b) => {
+        let i = 0;
+        while (i < fields.length) {
+            let compare = a[fields[i]].localeCompare(b[fields[i]], 'en', { sensitivity: 'base' });
+            if (compare == 0) i++; else return compare * direction;
+        }
+        return a.title.localeCompare(b.title, 'en', { sensitivity: 'base' }) * direction;
+    });
+    
+    loadPage(1);
 }
 
 function loadPage(page) {

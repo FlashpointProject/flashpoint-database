@@ -241,11 +241,16 @@ body {
 .results-top {
     padding-bottom: 0.5rem;
     border-bottom: 0.15rem solid #0002;
-    justify-content: space-between;
     align-items: center;
+}
+.results-count {
+    margin-right: auto;
 }
 .results-total {
     font-weight: bold;
+}
+.results-sort {
+    margin-right: 24px;
 }
 .results-per-page {
     font-size: 0.7rem;
@@ -305,14 +310,14 @@ body {
 .viewer {
     flex-direction: column;
 }
-.viewer-header > :not(.viewer-back) {
-    float: right;
+.viewer-header {
+    display: flex;
 }
 .viewer-back {
-    float: left;
+    margin-right: auto;
 }
-.viewer-open {
-    margin-left: 20px;
+.viewer-copy {
+    margin-right: 20px;
 }
 .viewer-images {
     display: flex;
