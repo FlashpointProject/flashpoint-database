@@ -316,8 +316,8 @@ body {
 .viewer-back {
     margin-right: auto;
 }
-.viewer-copy {
-    margin-right: 20px;
+.viewer-open {
+    margin-left: 20px;
 }
 .viewer-images {
     display: flex;
