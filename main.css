@@ -305,11 +305,14 @@ body {
 .viewer {
     flex-direction: column;
 }
+.viewer-header > :not(.viewer-back) {
+    float: right;
+}
 .viewer-back {
     float: left;
 }
-.viewer-copy {
-    float: right;
+.viewer-open {
+    margin-left: 20px;
 }
 .viewer-images {
     display: flex;

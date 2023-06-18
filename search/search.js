@@ -400,4 +400,5 @@ document.querySelectorAll('.results-go-to-page').forEach((elem, i) => elem.addEv
 document.querySelectorAll('.results-input-page').forEach(elem => elem.addEventListener('keyup', e => { if (e.key == 'Enter') loadPageFromInput(e.target); }));
 
 document.querySelector('.viewer-back').addEventListener('click', backToResults);
+document.querySelector('.viewer-open').addEventListener('click', () => location.href = 'flashpoint://run/' + fpdb.list[fpdb.currentEntry].id);
 document.querySelector('.viewer-copy').addEventListener('click', () => navigator.clipboard.writeText(location.href + '#' + fpdb.list[fpdb.currentEntry].id));
