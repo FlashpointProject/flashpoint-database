@@ -38,6 +38,15 @@ let fpdb = {
     }
 };
 
+let player = {
+    ruffleSource: 'https://unpkg.com/@ruffle-rs/ruffle',
+    jsZipSource: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+    loaded: false,
+    instance: null
+};
+
+const _fetch = window.fetch;
+
 fetch(fpdb.api + '/platforms').then(r => r.json()).then(json => { fpdb.platforms = json; });
 
 fetch('fields.json').then(r => r.json()).then(async json => {
@@ -273,11 +282,10 @@ async function loadEntry(e) {
     if (e != undefined) {
         i = parseInt(e.target.getAttribute('view'));
         if (isNaN(i)) return;
-        document.querySelector('.viewer-header').hidden = false;
+        document.querySelector('.viewer-back').style.visibility = 'visible';
     }
-    else if (fpdb.list.length > 0) {
-        document.querySelector('.viewer-header').hidden = true;
-    }
+    else if (fpdb.list.length > 0)
+        document.querySelector('.viewer-back').style.visibility = 'hidden';
     else return;
     
     fpdb.currentEntry = i;
@@ -289,6 +297,8 @@ async function loadEntry(e) {
     document.querySelector('.results-list').hidden = true;
     document.querySelector('.results-bottom').hidden = true;
     document.querySelector('.results > .common-loading').hidden = false;
+    
+    document.querySelector('.viewer-play').hidden = !new URL(entry.launchCommand).pathname.endsWith('.swf')
     
     let requests = [
         `${fpdb.api}/logo?id=${entry.id}`,
@@ -417,6 +427,76 @@ async function loadEntry(e) {
     document.querySelector('.viewer').style.display = 'flex';
 }
 
+async function playEntry() {
+    if (!player.loaded) {
+        let ruffleScript = document.createElement('script');
+        ruffleScript.src = player.ruffleSource;
+        
+        ruffleScript.addEventListener('load', () => {
+            player.instance = window.RufflePlayer.newest().createPlayer();
+            document.querySelector('.player-instance').append(player.instance);
+            
+            let jsZipScript = document.createElement('script');
+            jsZipScript.src = player.jsZipSource;
+            
+            jsZipScript.addEventListener('load', () => {
+                player.loaded = true;
+                playEntry();
+            });
+            
+            document.head.append(jsZipScript);
+        });
+        
+        document.head.append(ruffleScript);
+        return;
+    }
+    
+    document.querySelector('.player').style.display = 'inline-block';
+    
+    let entry = fpdb.list[fpdb.currentEntry];
+    
+    window.RufflePlayer.config.base = entry.launchCommand.substring(0, entry.launchCommand.lastIndexOf('/'));
+    
+    let gameZip;
+    if (entry.zipped) gameZip = await new JSZip().loadAsync(await fetch(`${fpdb.api}/get?id=${entry.id}`).then(r => r.blob()));
+    
+    window.fetch = async (resource, options) => {
+        let resourceURL = new URL(resource instanceof Request ? resource.url : resource);
+        
+        if (resourceURL.protocol == 'blob:')
+            resourceURL = new URL(resourceURL.pathname);
+        
+        if (resourceURL.hostname == 'unpkg.com' || !resourceURL.protocol.startsWith('http'))
+            return await _fetch(resource, options);
+        
+        let redirectedURL = new URL(resourceURL.origin == location.origin ? resourceURL.pathname.substring(1) : resourceURL.href, entry.launchCommand),
+            response;
+        
+        if (entry.zipped) {
+            let redirectedFile = gameZip.file('content/' + redirectedURL.hostname + redirectedURL.pathname);
+        
+            response = await _fetch(redirectedFile == null
+                ? `${fpdb.api}/get?url=${redirectedURL.hostname + redirectedURL.pathname}`
+                : URL.createObjectURL(await redirectedFile.async('blob'))
+            , options);
+        }
+        else
+            response = await _fetch(`${fpdb.api}/get?url=${redirectedURL.hostname + redirectedURL.pathname}`, options);
+        
+        Object.defineProperty(response, "url", { value: redirectedURL.href });
+        return response;
+    }
+    
+    player.instance.load(entry.launchCommand);
+    
+    player.instance.addEventListener('loadedmetadata', () => {
+        if (player.instance.metadata.width > 1 && player.instance.metadata.height > 1) {
+            player.instance.style.width  = player.instance.metadata.width  + 'px';
+            player.instance.style.height = player.instance.metadata.height + 'px';
+        }
+    });
+}
+
 function backToResults() {
     document.querySelector('.viewer').style.display = 'none';
     document.querySelector('.results-top').style.display = 'flex';
@@ -436,5 +516,11 @@ document.querySelectorAll('.results-go-to-page').forEach((elem, i) => elem.addEv
 document.querySelectorAll('.results-input-page').forEach(elem => elem.addEventListener('keyup', e => { if (e.key == 'Enter') loadPageFromInput(e.target); }));
 
 document.querySelector('.viewer-back').addEventListener('click', backToResults);
-document.querySelector('.viewer-open').addEventListener('click', () => location.href = 'flashpoint://run/' + fpdb.list[fpdb.currentEntry].id);
 document.querySelector('.viewer-copy').addEventListener('click', () => navigator.clipboard.writeText(location.href + '#' + fpdb.list[fpdb.currentEntry].id));
+document.querySelector('.viewer-play').addEventListener('click', playEntry);
+
+document.querySelector('.player-overlay').addEventListener('click', e => {
+    player.instance.pause();
+    e.target.parentNode.style.display = 'none';
+    window.fetch = _fetch;
+});
