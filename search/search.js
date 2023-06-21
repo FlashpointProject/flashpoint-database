@@ -434,7 +434,7 @@ async function playEntry() {
         
         ruffleScript.addEventListener('load', () => {
             player.instance = window.RufflePlayer.newest().createPlayer();
-            document.querySelector('.player-instance').append(player.instance);
+            document.querySelector('.player').append(player.instance);
             
             let jsZipScript = document.createElement('script');
             jsZipScript.src = player.jsZipSource;
@@ -494,6 +494,7 @@ async function playEntry() {
             player.instance.style.width  = player.instance.metadata.width  + 'px';
             player.instance.style.height = player.instance.metadata.height + 'px';
         }
+        player.instance.style.display = 'initial';
     });
 }
 
@@ -520,7 +521,9 @@ document.querySelector('.viewer-copy').addEventListener('click', () => navigator
 document.querySelector('.viewer-play').addEventListener('click', playEntry);
 
 document.querySelector('.player-overlay').addEventListener('click', e => {
+    player.instance.style.display = 'none';
     player.instance.pause();
+    
     e.target.parentNode.style.display = 'none';
     window.fetch = _fetch;
 });

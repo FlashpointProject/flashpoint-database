@@ -317,7 +317,7 @@ body {
     margin-right: auto;
 }
 .viewer-play {
-    margin-left: 20px;
+    margin-right: 20px;
 }
 .viewer-images {
     display: flex;
@@ -366,17 +366,15 @@ body {
     top: 0; left: 0;
     z-index: 1;
 }
-.player-overlay {
-    width: 100%;
-    height: 100%;
-    background-color: #0008;
-}
-.player-instance {
-    background-color: #000;
-    display: inline-block;
+.player ruffle-player {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
+}
+.player-overlay {
+    width: 100%;
+    height: 100%;
+    background-color: #000b;
 }
 
 .download-center {
