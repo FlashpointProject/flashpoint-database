@@ -249,8 +249,8 @@ body {
 .results-total {
     font-weight: bold;
 }
-.results-sort {
-    margin-right: 24px;
+.results-navigate {
+    margin-left: 24px;
 }
 .results-per-page {
     font-size: 0.7rem;
