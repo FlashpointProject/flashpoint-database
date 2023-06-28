@@ -298,7 +298,7 @@ async function loadEntry(e) {
     document.querySelector('.results-bottom').hidden = true;
     document.querySelector('.results > .common-loading').hidden = false;
     
-    document.querySelector('.viewer-play').hidden = !new URL(entry.launchCommand).pathname.endsWith('.swf')
+    document.querySelector('.viewer-play').hidden = !(entry.platform == 'Flash' && new URL(entry.launchCommand).pathname.endsWith('.swf'));
     
     let requests = [
         `${fpdb.api}/logo?id=${entry.id}`,
