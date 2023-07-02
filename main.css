@@ -366,7 +366,7 @@ body {
     top: 0; left: 0;
     z-index: 1;
 }
-.player ruffle-player {
+.player-instance {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
