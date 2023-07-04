@@ -369,7 +369,7 @@ async function loadEntry(e) {
         let launchPath = new URL(entry.launchCommand).pathname;
         for (let player of players) {
             if (player.platforms.some(platform => entry.platform == platform)
-             && player.extensions.some(extension => launchPath.endsWith(extension)))
+             && player.extensions.some(extension => launchPath.toLowerCase().endsWith(extension)))
                 return false;
         }
         return true;
@@ -485,7 +485,19 @@ async function loadEntry(e) {
         
         for (let file of files) {
             let span = document.createElement('span');
-            span.textContent += file;
+            span.textContent = file;
+            
+            for (let player of players) {
+                let fileURL = 'http://' + file;
+                if (player.extensions.some(extension => fileURL.toLowerCase().endsWith(extension))) {
+                    fileList.append(document.createElement('span'));
+                    
+                    span.className = 'common-activate';
+                    span.addEventListener('click', () => playEntry(fileURL));
+                    
+                    break;
+                }
+            }
             
             fileList.append(span);
         }
@@ -502,13 +514,13 @@ async function loadEntry(e) {
     document.querySelector('.viewer').style.display = 'flex';
 }
 
-async function playEntry() {
+async function playEntry(launchCommand = fpdb.list[fpdb.currentEntry].launchCommand) {
     let entry = fpdb.list[fpdb.currentEntry],
-        launchPath = new URL(entry.launchCommand).pathname,
+        launchPath = new URL(launchCommand).pathname,
         activePlayer = -1;
     
     for (let i = 0; i < players.length; i++) {
-        if (!players[i].extensions.some(ext => launchPath.endsWith(ext))) continue;
+        if (!players[i].extensions.some(ext => launchPath.toLowerCase().endsWith(ext))) continue;
         
         if (!players[i].loaded) {
             let script = document.createElement('script');
@@ -517,7 +529,7 @@ async function playEntry() {
             document.head.append(script);
             script.addEventListener('load', () => {
                 players[i].loaded = true;
-                if (!jsZip.loaded) loadJsZip();
+                if (!jsZip.loaded) loadJsZip(launchCommand);
             });
         }
         
@@ -534,7 +546,7 @@ async function playEntry() {
     
     let redirect = async url => {
         let info = {
-            base: new URL(url.origin == location.origin ? url.pathname.substring(1) : url.href, entry.launchCommand),
+            base: new URL(url.origin == location.origin ? url.pathname.substring(1) : url.href, launchCommand),
             url: ''
         };
         
@@ -581,16 +593,16 @@ async function playEntry() {
         return element;
     };
     
-    players[activePlayer].instance = entry.launchCommand;
+    players[activePlayer].instance = launchCommand;
 }
 
-function loadJsZip() {
+function loadJsZip(launchCommand) {
     let script = document.createElement('script');
     script.src = jsZip.source;
     
     script.addEventListener('load', () => {
         jsZip.loaded = true;
-        playEntry();
+        playEntry(launchCommand);
     });
     
     document.head.append(script);
