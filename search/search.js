@@ -628,7 +628,7 @@ document.querySelectorAll('.results-input-page').forEach(elem => elem.addEventLi
 
 document.querySelector('.viewer-back').addEventListener('click', backToResults);
 document.querySelector('.viewer-copy').addEventListener('click', () => navigator.clipboard.writeText(location.href + '#' + fpdb.list[fpdb.currentEntry].id));
-document.querySelector('.viewer-play').addEventListener('click', playEntry);
+document.querySelector('.viewer-play').addEventListener('click', () => playEntry());
 
 document.querySelector('.player-overlay').addEventListener('click', e => {
     document.querySelector('.player-instance').style.display = 'none';
