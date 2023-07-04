@@ -99,8 +99,8 @@ let players = [
                 fpdb.activePlayer = this.index;
             }
             
-            this._instance.browser.loadURL(new X3D.MFString(launchCommand));
             this._instance.browser.baseURL = launchCommand.substring(0, launchCommand.lastIndexOf('/'));
+            this._instance.browser.loadURL(new X3D.MFString(launchCommand));
             
             this._instance.style.display = 'inline-block';
         },
@@ -116,6 +116,7 @@ let jsZip = {
 };
 
 const _fetch = window.fetch;
+const _createElement = document.createElement;
 
 fetch(fpdb.api + '/platforms').then(r => r.json()).then(json => { fpdb.platforms = json; });
 
@@ -531,10 +532,26 @@ async function playEntry() {
     let gameZip;
     if (entry.zipped) gameZip = await new JSZip().loadAsync(await fetch(`${fpdb.api}/get?id=${entry.id}`).then(r => r.blob()));
     
+    let redirect = async url => {
+        let info = {
+            base: new URL(url.origin == location.origin ? url.pathname.substring(1) : url.href, entry.launchCommand),
+            url: ''
+        };
+        
+        if (entry.zipped) {
+            let redirectedFile = gameZip.file('content/' + info.base.hostname + info.base.pathname);
+            if (redirectedFile != null) {
+                info.url = URL.createObjectURL(await redirectedFile.async('blob'));
+                return info;
+            }
+        }
+        
+        info.url = `${fpdb.api}/get?url=${info.base.hostname + info.base.pathname}`;
+        return info;
+    };
+    
     window.fetch = async (resource, options) => {
         let resourceURL = new URL(resource instanceof Request ? resource.url : resource);
-        
-        console.log(resourceURL.href);
         
         if (resourceURL.protocol == 'blob:')
             resourceURL = new URL(resourceURL.pathname);
@@ -542,23 +559,27 @@ async function playEntry() {
         if (resourceURL.hostname == 'unpkg.com' || !resourceURL.protocol.startsWith('http'))
             return await _fetch(resource, options);
         
-        let redirectedURL = new URL(resourceURL.origin == location.origin ? resourceURL.pathname.substring(1) : resourceURL.href, entry.launchCommand),
-            response;
+        let redirectInfo = await redirect(resourceURL),
+            response = await _fetch(redirectInfo.url, options);
         
-        if (entry.zipped) {
-            let redirectedFile = gameZip.file('content/' + redirectedURL.hostname + redirectedURL.pathname);
-        
-            response = await _fetch(redirectedFile == null
-                ? `${fpdb.api}/get?url=${redirectedURL.hostname + redirectedURL.pathname}`
-                : URL.createObjectURL(await redirectedFile.async('blob'))
-            , options);
-        }
-        else
-            response = await _fetch(`${fpdb.api}/get?url=${redirectedURL.hostname + redirectedURL.pathname}`, options);
-        
-        Object.defineProperty(response, "url", { value: redirectedURL.href });
+        Object.defineProperty(response, 'url', { value: redirectInfo.base.href });
         return response;
     }
+    
+    document.createElement = function(...args) {
+        let element = _createElement.apply(this, args),
+            observer = new MutationObserver(async records => {
+                for (let record of records) {
+                    if (['blob:', fpdb.api].some(prefix => record.target.src.startsWith(prefix))) continue;
+                    record.target.src = (await redirect(new URL(record.target.src))).url;
+                }
+            });
+        
+        if (element.tagName == 'IMG')
+            observer.observe(element, { attributes: true, attributeFilter: ['src'] });
+        
+        return element;
+    };
     
     players[activePlayer].instance = entry.launchCommand;
 }
@@ -603,4 +624,5 @@ document.querySelector('.player-overlay').addEventListener('click', e => {
     
     e.target.parentNode.style.display = 'none';
     window.fetch = _fetch;
+    document.createElement = _createElement;
 });
