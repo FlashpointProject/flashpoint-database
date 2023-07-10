@@ -49,7 +49,7 @@
     "values": []
   },
   {
-    "name": "platform",
+    "name": "platformsStr",
     "displayName": "Platform",
     "values": []
   },

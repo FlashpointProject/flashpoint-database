@@ -176,7 +176,7 @@ function addField(field) {
     del.addEventListener('click', () => { row.remove() });
     name.append(del, field.displayName + ':');
     
-    if (field.name == 'platform')
+    if (field.name == 'platformsStr')
         field.values = fpdb.platforms.map(platform => ({ name: platform, displayName: platform }));
     
     if (field.values.length > 0) {
