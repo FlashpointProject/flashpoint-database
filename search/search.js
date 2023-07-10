@@ -310,7 +310,7 @@ function loadPage(page) {
         
         let type = document.createElement('span');
         type.className = 'entry-type';
-        type.textContent = fpdb.list[i].platform + (fpdb.list[i].library == 'arcade' ? ' game' : ' animation');
+        type.textContent = fpdb.list[i].platform.replace(/; /g, '/') + (fpdb.list[i].library == 'arcade' ? ' game' : ' animation');
         
         let tags = document.createElement('span');
         tags.className = 'entry-tags';
