@@ -366,7 +366,9 @@ async function loadEntry(e) {
     document.querySelector('.results > .common-loading').hidden = false;
     
     document.querySelector('.viewer-play').hidden = (() => {
-        let launchPath = new URL(entry.launchCommand).pathname;
+        let launchPath;
+        try { launchPath = new URL(entry.launchCommand).pathname; } catch { return true; }
+        
         for (let player of players) {
             if (player.platforms.some(platform => entry.platform == platform)
              && player.extensions.some(extension => launchPath.toLowerCase().endsWith(extension)))
