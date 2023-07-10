@@ -492,11 +492,8 @@ async function loadEntry(e) {
             for (let player of players) {
                 let fileURL = 'http://' + file;
                 if (player.extensions.some(extension => fileURL.toLowerCase().endsWith(extension))) {
-                    fileList.append(document.createElement('span'));
-                    
                     span.className = 'common-activate';
                     span.addEventListener('click', () => playEntry(fileURL));
-                    
                     break;
                 }
             }

@@ -350,12 +350,14 @@ body {
 .viewer-file-list {
     font-family: monospace;
     background-color: #0001;
-    padding: 0.1rem 0.5rem;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
     word-break: break-all;
 }
 .viewer-file-list span {
-    display: block;
-    margin: 0.3rem 0;
+    margin-right: auto;
 }
 
 .player {
