@@ -2,8 +2,8 @@ fetch('https://db-api.unstable.life/stats').then(r => r.json()).then(json => {
     document.querySelector('.stats-games div:last-child').textContent      = json.libraryTotals[0].count.toLocaleString();
     document.querySelector('.stats-animations div:last-child').textContent = json.libraryTotals[1].count.toLocaleString();
     
-    document.querySelector('.stats-legacy div:last-child').textContent     = json.formatTotals[0].count.toLocaleString();
-    document.querySelector('.stats-gamezip div:last-child').textContent    = json.formatTotals[1].count.toLocaleString();
+    document.querySelector('.stats-legacy div:last-child').textContent     = json.formatTotals[1].count.toLocaleString();
+    document.querySelector('.stats-gamezip div:last-child').textContent    = json.formatTotals[0].count.toLocaleString();
     
     let platforms = json.platformTotals.sort((a, b) => a.count == b.count ? 0 : (a.count > b.count ? -1 : 1));
     
