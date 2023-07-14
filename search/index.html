@@ -1,109 +1,111 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Search - Flashpoint Database</title>
-        <link rel="icon" href="../favicon.ico">
-        <link rel="stylesheet" href="../main.css">
-        <script defer src="search.js"></script>
-    </head>
-    <body>
-        <div class="navbar">
-            <a href="../" class="navbar-logo">
-                <img src="../logo.svg" height="100%">
-                <span>Flashpoint Database</span>
-            </a>
-            <a href="../search">Search</a>
-            <!--a href="../downloads">Downloads</a-->
-            <a href="../statistics">Statistics</a>
-            <a href="https://github.com/FlashpointProject/flashpoint-database" class="navbar-right">Source Code</a>
-            <a href="https://bluemaxima.org/flashpoint">Back to Home</a>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search - Flashpoint Database</title>
+  <link rel="icon" href="../favicon.ico">
+  <link rel="stylesheet" href="../main.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../" class="navbar-logo">
+      <img src="../logo.svg">
+      <span>Flashpoint Database</span>
+    </a>
+    <a href="../search">Search</a>
+    <!--a href="../downloads">Downloads</a-->
+    <a href="../statistics">Statistics</a>
+    <a href="https://github.com/FlashpointProject/flashpoint-database" class="navbar-right" target="_blank">Source Code</a>
+    <a href="https://bluemaxima.org/flashpoint">Back to Home</a>
+  </nav>
+  <main>
+    <div class="search">
+      <div class="common-header">Search</div>
+      <div class="search-fields">
+        <select class="search-fields-list"></select>
+        <button class="search-fields-add">Add Field</button>
+      </div>
+      <table class="search-table"></table>
+      <input type="checkbox" id="filter" checked> <label for="filter">Filter NSFW entries</label>
+      <input type="checkbox" id="any"> <label for="any">Match any</label>
+      <button class="search-button">Search</button>
+    </div>
+    <div class="results">
+      <div class="common-header">Results</div>
+      <div class="common-loading" hidden>
+        <div><div></div></div>
+        Loading...
+      </div>
+      <div class="results-top" style="display:none">
+        <div class="results-count">
+          Got <span class="results-total"></span> results <span class="results-per-page">(100 per page)</span>
         </div>
-        <div class="content">
-            <div class="search">
-                <div class="common-header">Search</div>
-                <div class="search-fields">
-                    <select class="search-fields-list"></select>
-                    <button class="search-fields-add">Add Field</button>
-                </div>
-                <table class="search-table"></table>
-                <input type="checkbox" id="filter" checked> <label for="filter">Filter NSFW entries</label>
-                <input type="checkbox" id="any"> <label for="any">Match any</label>
-                <button class="search-button">Search</button>
-            </div>
-            <div class="results">
-                <div class="common-header">Results</div>
-                <div class="common-loading" hidden>
-                    <div><div></div></div>
-                    Loading...
-                </div>
-                <div class="results-top" style="display:none">
-                    <div class="results-count">
-                        Got <span class="results-total"></span> results <span class="results-per-page">(100 per page)</span>
-                    </div>
-                    <div class="results-sort">
-                        Sort:
-                        <select class="results-sort-options"></select>
-                        <select class="results-sort-direction">
-                            <option selected>Ascending</option>
-                            <option>Descending</option>
-                        </select>
-                    </div>
-                    <div class="results-navigate">
-                        <button class="results-first-page">&#60;&#60;</button>
-                        <button class="results-back-page">&#60;</button>
-                        <span class="results-current-page"></span> / <span class="results-max-pages"></span>
-                        <button class="results-forward-page">&#62;</button>
-                        <button class="results-last-page">&#62;&#62;</button>
-                        
-                        <input type="text" placeholder="#" class="results-input-page">
-                        <button class="results-go-to-page">Go</button>
-                    </div>
-                </div>
-                <div class="results-list" hidden></div>
-                <div class="results-bottom results-navigate" hidden>
-                    <button class="results-first-page">&#60;&#60;</button>
-                    <button class="results-back-page">&#60;</button>
-                    <span class="results-current-page"></span> / <span class="results-max-pages"></span>
-                    <button class="results-forward-page">&#62;</button>
-                    <button class="results-last-page">&#62;&#62;</button>
-                    
-                    <input type="text" placeholder="#" class="results-input-page">
-                    <button class="results-go-to-page">Go</button>
-                </div>
-                <div class="viewer common-center" style="display:none">
-                    <div class="viewer-header">
-                        <div class="viewer-back common-activate">&#60; Back to Results</div>
-                        <div class="viewer-play common-activate" hidden>Play in browser</div>
-                        <div class="viewer-copy common-activate">Copy link</div>
-                    </div>
-                    
-                    <div class="common-subheader">Images</div>
-                    <div class="viewer-images">
-                        <fieldset class="viewer-logo">
-                            <legend>Logo</legend>
-                            <img>
-                        </fieldset>
-                        <fieldset class="viewer-screenshot">
-                            <legend>Screenshot</legend>
-                            <img>
-                        </fieldset>
-                    </div>
-                    
-                    <div class="common-subheader">Metadata</div>
-                    <table class="viewer-metadata common-table"></table>
-                    
-                    <div class="common-subheader">Additional Apps</div>
-                    <div class="viewer-no-add-apps">This entry contains no additional apps.</div>
-                    <div class="viewer-add-apps"></div>
-                    
-                    <div class="common-subheader">Files</div>
-                    <div class="viewer-no-file-list" hidden>Cannot display file listing for this entry because it uses the Legacy format.</div>
-                    <div class="viewer-file-list"></div>
-                </div>
-            </div>
+        <div class="results-sort">
+          Sort:
+          <select class="results-sort-options"></select>
+          <select class="results-sort-direction">
+            <option selected>Ascending</option>
+            <option>Descending</option>
+          </select>
         </div>
-        <div class="player">
-            <div class="player-overlay"></div>
+        <div class="results-navigate">
+          <button class="results-first-page">&#60;&#60;</button>
+          <button class="results-back-page">&#60;</button>
+          <span class="results-current-page"></span> / <span class="results-max-pages"></span>
+          <button class="results-forward-page">&#62;</button>
+          <button class="results-last-page">&#62;&#62;</button>
+
+          <input type="text" placeholder="#" class="results-input-page">
+          <button class="results-go-to-page">Go</button>
         </div>
-    </body>
+      </div>
+      <div class="results-list" hidden></div>
+      <div class="results-bottom results-navigate" hidden>
+        <button class="results-first-page">&#60;&#60;</button>
+        <button class="results-back-page">&#60;</button>
+        <span class="results-current-page"></span> / <span class="results-max-pages"></span>
+        <button class="results-forward-page">&#62;</button>
+        <button class="results-last-page">&#62;&#62;</button>
+
+        <input type="text" placeholder="#" class="results-input-page">
+        <button class="results-go-to-page">Go</button>
+      </div>
+      <div class="viewer common-center" style="display:none">
+        <div class="viewer-header">
+          <div class="viewer-back common-activate">&#60; Back to Results</div>
+          <div class="viewer-play common-activate" hidden>Play in browser</div>
+          <div class="viewer-copy common-activate">Copy link</div>
+        </div>
+
+        <div class="common-subheader">Images</div>
+        <div class="viewer-images">
+          <fieldset class="viewer-logo">
+            <legend>Logo</legend>
+            <img>
+          </fieldset>
+          <fieldset class="viewer-screenshot">
+            <legend>Screenshot</legend>
+            <img>
+          </fieldset>
+        </div>
+
+        <div class="common-subheader">Metadata</div>
+        <table class="viewer-metadata common-table"></table>
+
+        <div class="common-subheader">Additional Apps</div>
+        <div class="viewer-no-add-apps">This entry contains no additional apps.</div>
+        <div class="viewer-add-apps"></div>
+
+        <div class="common-subheader">Files</div>
+        <div class="viewer-no-file-list" hidden>Cannot display file listing for this entry because it uses the Legacy format.</div>
+        <div class="viewer-file-list"></div>
+      </div>
+    </div>
+  </main>
+  <div class="player">
+    <div class="player-overlay"></div>
+  </div>
+  <script src="search.js"></script>
+</body>
 </html>
