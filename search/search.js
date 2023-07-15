@@ -1,5 +1,5 @@
 let fpdb = {
-    api: location.origin == 'http://localhost' ? 'http://127.0.0.1:8986' : 'https://db-api.unstable.life',
+    api: 'https://db-api.unstable.life',
     platforms: [],
     sortOptions: [],
     list: [],
@@ -501,11 +501,11 @@ async function loadEntry(e) {
             fileList.append(span);
         }
         
-        fileList.hidden = false;
+        fileList.style.display = 'flex';
         document.querySelector('.viewer-no-file-list').hidden = true;
     }
     else {
-        fileList.hidden = true;
+        fileList.style.display = 'none';
         document.querySelector('.viewer-no-file-list').hidden = false;
     }
     
