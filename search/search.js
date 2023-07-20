@@ -630,8 +630,11 @@ document.querySelector('.viewer-copy').addEventListener('click', () => navigator
 document.querySelector('.viewer-play').addEventListener('click', () => playEntry());
 
 document.querySelector('.player-overlay').addEventListener('click', e => {
-    document.querySelector('.player-instance').style.display = 'none';
-    players[fpdb.activePlayer].stop();
+    try {
+        document.querySelector('.player-instance').style.display = 'none';
+        players[fpdb.activePlayer].stop();
+    }
+    catch {}
     
     e.target.parentNode.style.display = 'none';
     window.fetch = _fetch;
