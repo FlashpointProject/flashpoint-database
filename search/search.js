@@ -360,6 +360,7 @@ async function loadEntry(e) {
     
     let entry = fpdb.list[fpdb.currentEntry];
     
+    location.hash = entry.id;
     document.querySelector('.results-top').style.display = 'none';
     document.querySelector('.results-list').hidden = true;
     document.querySelector('.results-bottom').hidden = true;
@@ -608,6 +609,7 @@ function loadJsZip(launchCommand) {
 }
 
 function backToResults() {
+    location.hash = '';
     document.querySelector('.viewer').style.display = 'none';
     document.querySelector('.results-top').style.display = 'flex';
     document.querySelector('.results-list').hidden = false;
@@ -626,7 +628,6 @@ document.querySelectorAll('.results-go-to-page').forEach((elem, i) => elem.addEv
 document.querySelectorAll('.results-input-page').forEach(elem => elem.addEventListener('keyup', e => { if (e.key == 'Enter') loadPageFromInput(e.target); }));
 
 document.querySelector('.viewer-back').addEventListener('click', backToResults);
-document.querySelector('.viewer-copy').addEventListener('click', () => navigator.clipboard.writeText(location.href + '#' + fpdb.list[fpdb.currentEntry].id));
 document.querySelector('.viewer-play').addEventListener('click', () => playEntry());
 
 document.querySelector('.player-overlay').addEventListener('click', e => {
