@@ -411,13 +411,14 @@ async function loadEntry(e) {
     else return;
     
     location.hash = id;
+    fpdb.lastScrollPos = document.querySelector('.results').scrollTop;
+    
     document.querySelector('.results-top').style.display = 'none';
     document.querySelector('.results-list').hidden = true;
     document.querySelector('.results-bottom').hidden = true;
     document.querySelector('.results > .common-loading').hidden = false;
     
     fpdb.activeEntry = (await fetch(`${fpdb.api}/search?id=${id}&limit=1`).then(r => r.json()))[0];
-    fpdb.lastScrollPos = document.querySelector('.results').scrollTop;
     
     document.querySelector('.viewer-play').hidden = (() => {
         let launchPath;
