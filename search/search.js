@@ -88,21 +88,21 @@ const players = [
         },
         
         instance: null,
-        async startPlayer() {
+        async startPlayer(launchCommand) {
             if (fpdb.activePlayer != this.index) {
                 document.querySelectorAll('.player-instance').forEach(elem => elem.remove());
                 
                 this.instance = window.RufflePlayer.newest().createPlayer();
                 this.instance.className = 'player-instance';
+                this.instance.config.allowScriptAccess = true;
                 
                 document.querySelector('.player').append(this.instance);
                 
                 fpdb.activePlayer = this.index;
             }
             
-            this.instance.load(fpdb.activeEntry.launchCommand);
-            this.instance.config.base = fpdb.activeEntry.launchCommand.substring(0, fpdb.activeEntry.launchCommand.lastIndexOf('/') + 1);
-            this.instance.allowScriptAccess = true;
+            this.instance.config.base = launchCommand.substring(0, launchCommand.lastIndexOf('/') + 1);
+            this.instance.load(launchCommand);
             
             this.instance.addEventListener('loadedmetadata', () => {
                 if (this.instance.metadata.width > 1 && this.instance.metadata.height > 1) {
@@ -141,7 +141,7 @@ const players = [
         },
         
         instance: null,
-        async startPlayer() {
+        async startPlayer(launchCommand) {
             if (fpdb.activePlayer != this.index) {
                 document.querySelectorAll('.player-instance').forEach(elem => elem.remove());
                 
@@ -158,8 +158,8 @@ const players = [
                 fpdb.activePlayer = this.index;
             }
             
-            this.instance.browser.baseURL = fpdb.activeEntry.launchCommand.substring(0, fpdb.activeEntry.launchCommand.lastIndexOf('/') + 1);
-            this.instance.browser.loadURL(new X3D.MFString((await redirect(new URL(fpdb.activeEntry.launchCommand))).redirect));
+            this.instance.browser.baseURL = launchCommand.substring(0, launchCommand.lastIndexOf('/') + 1);
+            this.instance.browser.loadURL(new X3D.MFString((await redirect(new URL(launchCommand))).redirect));
             
             this.instance.style.display = 'inline-block';
         },
@@ -425,16 +425,15 @@ async function loadEntry(e) {
         try { launchPath = new URL(fpdb.activeEntry.launchCommand).pathname; } catch { return true; }
         
         for (let player of players) {
-            if (player.platforms.some(platform => fpdb.activeEntry.platform == platform)
-             && player.extensions.some(extension => launchPath.toLowerCase().endsWith(extension)))
+            if (player.extensions.some(extension => launchPath.toLowerCase().endsWith(extension)))
                 return false;
         }
         return true;
     })();
     
     let requests = [
-        `${fpdb.api}/logo?id=${fpdb.activeEntry.id}`,
-        `${fpdb.api}/screenshot?id=${fpdb.activeEntry.id}`,
+        `${fpdb.api}/logo?id=${fpdb.activeEntry.id}&width=320`,
+        `${fpdb.api}/screenshot?id=${fpdb.activeEntry.id}&width=480`,
         `${fpdb.api}/addapps?id=${fpdb.activeEntry.id}`,
         `${fpdb.api}/files?id=${fpdb.activeEntry.id}`,
     ];
@@ -451,6 +450,8 @@ async function loadEntry(e) {
     
     document.querySelector('.viewer-logo img').src = URL.createObjectURL(logo);
     document.querySelector('.viewer-screenshot img').src = URL.createObjectURL(screenshot);
+    document.querySelector('.viewer-logo a').href = `${fpdb.api}/logo?id=${fpdb.activeEntry.id}`;
+    document.querySelector('.viewer-screenshot a').href = `${fpdb.api}/screenshot?id=${fpdb.activeEntry.id}`;
     
     let metaTable = document.querySelector('.viewer-metadata');
     while (metaTable.firstChild)
@@ -568,8 +569,8 @@ async function loadEntry(e) {
     document.querySelector('.viewer').style.display = 'flex';
 }
 
-async function playEntry() {
-    let launchPath = new URL(fpdb.activeEntry.launchCommand).pathname,
+async function playEntry(launchCommand = fpdb.activeEntry.launchCommand) {
+    let launchPath = new URL(launchCommand).pathname,
         activePlayer = -1;
     
     for (let i = 0; i < players.length; i++) {
@@ -582,7 +583,7 @@ async function playEntry() {
             document.head.append(script);
             script.addEventListener('load', () => {
                 players[i].loaded = true;
-                if (!jsZip.loaded) loadJsZip(fpdb.activeEntry.launchCommand);
+                if (!jsZip.loaded) loadJsZip(launchCommand);
             });
         }
         
@@ -597,16 +598,16 @@ async function playEntry() {
     if (fpdb.activeEntry.zipped) gameZip = await new JSZip().loadAsync(await fetch(`${fpdb.api}/get?id=${fpdb.activeEntry.id}`).then(r => r.blob()));
     
     players[activePlayer].startRedirector();
-    players[activePlayer].startPlayer();
+    players[activePlayer].startPlayer(launchCommand);
 }
 
-function loadJsZip() {
+function loadJsZip(launchCommand) {
     let script = document.createElement('script');
     script.src = jsZip.source;
     
     script.addEventListener('load', () => {
         jsZip.loaded = true;
-        playEntry();
+        playEntry(launchCommand);
     });
     
     document.head.append(script);
@@ -632,7 +633,7 @@ document.querySelectorAll('.results-go-to-page').forEach((elem, i) => elem.addEv
 document.querySelectorAll('.results-input-page').forEach(elem => elem.addEventListener('keyup', e => { if (e.key == 'Enter') loadPageFromInput(e.target); }));
 
 document.querySelector('.viewer-back').addEventListener('click', backToResults);
-document.querySelector('.viewer-play').addEventListener('click', playEntry);
+document.querySelector('.viewer-play').addEventListener('click', () => playEntry());
 
 document.querySelector('.player-overlay').addEventListener('click', e => {
     try {
