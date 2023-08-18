@@ -39,7 +39,27 @@ let fpdb = {
     }
 };
 
-let players = [
+let gameZip = null;
+
+const redirect = async request => {
+    let url = {
+        original: new URL([location.origin, fpdb.api].some(origin => origin == request.origin) ? request.pathname.substring(1) : request.href, fpdb.activeEntry.launchCommand),
+        redirect: ''
+    };
+    
+    if (gameZip != null) {
+        let redirectedFile = gameZip.file(decodeURIComponent('content/' + url.original.hostname + url.original.pathname));
+        if (redirectedFile != null) {
+            url.redirect = URL.createObjectURL(await redirectedFile.async('blob'));
+            return url;
+        }
+    }
+    
+    url.redirect = `${fpdb.api}/get?url=${url.original.hostname + url.original.pathname}`;
+    return url;
+};
+
+const players = [
     {
         source: 'https://unpkg.com/@ruffle-rs/ruffle',
         platforms: [ 'Flash' ],
@@ -47,32 +67,54 @@ let players = [
         loaded: false,
         index: -1,
         
-        _instance: null,
-        set instance(launchCommand) {
+        redirectedElement: window.fetch,
+        startRedirector() {
+            let redirectedElement = this.redirectedElement;
+            window.fetch = async (resource, options) => {
+                let resourceURL = new URL(resource instanceof Request ? resource.url : resource);
+                
+                if (resourceURL.protocol == 'blob:')
+                    resourceURL = new URL(resourceURL.pathname);
+                
+                if (resourceURL.hostname == 'unpkg.com' || !resourceURL.protocol.startsWith('http'))
+                    return await redirectedElement(resource, options);
+                
+                let redirectInfo = await redirect(resourceURL),
+                    response = await redirectedElement(redirectInfo.redirect, options);
+                
+                Object.defineProperty(response, 'url', { value: redirectInfo.original.href });
+                return response;
+            };
+        },
+        
+        instance: null,
+        async startPlayer() {
             if (fpdb.activePlayer != this.index) {
                 document.querySelectorAll('.player-instance').forEach(elem => elem.remove());
                 
-                this._instance = window.RufflePlayer.newest().createPlayer();
-                this._instance.className = 'player-instance';
+                this.instance = window.RufflePlayer.newest().createPlayer();
+                this.instance.className = 'player-instance';
                 
-                document.querySelector('.player').append(this._instance);
+                document.querySelector('.player').append(this.instance);
                 
                 fpdb.activePlayer = this.index;
             }
             
-            this._instance.load(launchCommand);
-            window.RufflePlayer.config.base = launchCommand.substring(0, launchCommand.lastIndexOf('/'));
+            this.instance.load(fpdb.activeEntry.launchCommand);
+            this.instance.config.base = fpdb.activeEntry.launchCommand.substring(0, fpdb.activeEntry.launchCommand.lastIndexOf('/') + 1);
+            this.instance.allowScriptAccess = true;
             
-            this._instance.addEventListener('loadedmetadata', () => {
-                if (this._instance.metadata.width > 1 && this._instance.metadata.height > 1) {
-                    this._instance.style.width  = this._instance.metadata.width  + 'px';
-                    this._instance.style.height = this._instance.metadata.height + 'px';
+            this.instance.addEventListener('loadedmetadata', () => {
+                if (this.instance.metadata.width > 1 && this.instance.metadata.height > 1) {
+                    this.instance.style.width  = this.instance.metadata.width  + 'px';
+                    this.instance.style.height = this.instance.metadata.height + 'px';
                 }
-                this._instance.style.display = 'inline-block';
+                this.instance.style.display = 'inline-block';
             });
         },
         
-        stop() { this._instance.pause(); }
+        stopRedirector() { window.fetch = this.redirectedElement; },
+        stopPlayer() { this.instance.pause(); }
     },
     {
         source: 'https://create3000.github.io/code/x_ite/latest/x_ite.min.js',
@@ -81,42 +123,57 @@ let players = [
         loaded: false,
         index: -1,
         
-        _instance: null,
-        set instance(launchCommand) {
+        redirectedElement: document.createElement,
+        startRedirector() {
+            let redirectedElement = this.redirectedElement;
+            document.createElement = function(...args) {
+                let observer = new MutationObserver(async records => {
+                    let r = records.findIndex(record => !['blob:', fpdb.api + '/get?'].some(prefix => record.target.src.startsWith(prefix)));
+                    if (r != -1) records[r].target.src = (await redirect(new URL(records[r].target.src))).redirect;
+                });
+                
+                let element = redirectedElement.apply(this, args);
+                if (element.tagName == 'IMG')
+                    observer.observe(element, { attributes: true, attributeFilter: ['src'] });
+                
+                return element;
+            };
+        },
+        
+        instance: null,
+        async startPlayer() {
             if (fpdb.activePlayer != this.index) {
                 document.querySelectorAll('.player-instance').forEach(elem => elem.remove());
                 
-                this._instance = X3D.createBrowser();
-                this._instance.className = 'player-instance';
+                this.instance = X3D.createBrowser();
+                this.instance.className = 'player-instance';
                 
-                this._instance.style.maxWidth = '800px';
-                this._instance.style.maxHeight = '600px';
-                this._instance.style.width = '100%';
-                this._instance.style.height = '100%';
+                this.instance.style.maxWidth = '800px';
+                this.instance.style.maxHeight = '600px';
+                this.instance.style.width = '100%';
+                this.instance.style.height = '100%';
                 
-                document.querySelector('.player').append(this._instance);
+                document.querySelector('.player').append(this.instance);
                 
                 fpdb.activePlayer = this.index;
             }
             
-            this._instance.browser.baseURL = launchCommand.substring(0, launchCommand.lastIndexOf('/'));
-            this._instance.browser.loadURL(new X3D.MFString(launchCommand));
+            this.instance.browser.baseURL = fpdb.activeEntry.launchCommand.substring(0, fpdb.activeEntry.launchCommand.lastIndexOf('/') + 1);
+            this.instance.browser.loadURL(new X3D.MFString((await redirect(new URL(fpdb.activeEntry.launchCommand))).redirect));
             
-            this._instance.style.display = 'inline-block';
+            this.instance.style.display = 'inline-block';
         },
         
-        stop() {}
+        stopRedirector() { document.createElement = this.redirectedElement; },
+        stopPlayer() { this.instance.replaceWorld(null); },
     }
 ];
 players.forEach((player, i) => player.index = i);
 
-let jsZip = {
+const jsZip = {
     source: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
     loaded: false
 };
-
-const _fetch = window.fetch;
-const _createElement = document.createElement;
 
 fetch(fpdb.api + '/platforms').then(r => r.json()).then(json => { fpdb.platforms = json; });
 
@@ -536,59 +593,10 @@ async function playEntry() {
     
     document.querySelector('.player').style.display = 'inline-block';
     
-    let gameZip;
     if (fpdb.activeEntry.zipped) gameZip = await new JSZip().loadAsync(await fetch(`${fpdb.api}/get?id=${fpdb.activeEntry.id}`).then(r => r.blob()));
     
-    let redirect = async url => {
-        let info = {
-            base: new URL(url.origin == location.origin ? url.pathname.substring(1) : url.href, fpdb.activeEntry.launchCommand),
-            url: ''
-        };
-        
-        if (fpdb.activeEntry.zipped) {
-            let redirectedFile = gameZip.file(decodeURIComponent('content/' + info.base.hostname + info.base.pathname));
-            if (redirectedFile != null) {
-                info.url = URL.createObjectURL(await redirectedFile.async('blob'));
-                return info;
-            }
-        }
-        
-        info.url = `${fpdb.api}/get?url=${info.base.hostname + info.base.pathname}`;
-        return info;
-    };
-    
-    window.fetch = async (resource, options) => {
-        let resourceURL = new URL(resource instanceof Request ? resource.url : resource);
-        
-        if (resourceURL.protocol == 'blob:')
-            resourceURL = new URL(resourceURL.pathname);
-        
-        if (resourceURL.hostname == 'unpkg.com' || !resourceURL.protocol.startsWith('http'))
-            return await _fetch(resource, options);
-        
-        let redirectInfo = await redirect(resourceURL),
-            response = await _fetch(redirectInfo.url, options);
-        
-        Object.defineProperty(response, 'url', { value: redirectInfo.base.href });
-        return response;
-    }
-    
-    document.createElement = function(...args) {
-        let element = _createElement.apply(this, args),
-            observer = new MutationObserver(async records => {
-                for (let record of records) {
-                    if (['blob:', fpdb.api].some(prefix => record.target.src.startsWith(prefix))) continue;
-                    record.target.src = (await redirect(new URL(record.target.src))).url;
-                }
-            });
-        
-        if (element.tagName == 'IMG')
-            observer.observe(element, { attributes: true, attributeFilter: ['src'] });
-        
-        return element;
-    };
-    
-    players[activePlayer].instance = fpdb.activeEntry.launchCommand;
+    players[activePlayer].startRedirector();
+    players[activePlayer].startPlayer();
 }
 
 function loadJsZip() {
@@ -628,11 +636,10 @@ document.querySelector('.viewer-play').addEventListener('click', playEntry);
 document.querySelector('.player-overlay').addEventListener('click', e => {
     try {
         document.querySelector('.player-instance').style.display = 'none';
-        players[fpdb.activePlayer].stop();
+        players[fpdb.activePlayer].stopPlayer();
     }
     catch {}
     
     e.target.parentNode.style.display = 'none';
-    window.fetch = _fetch;
-    document.createElement = _createElement;
+    players[fpdb.activePlayer].stopRedirector();
 });
