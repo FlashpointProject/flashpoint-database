@@ -5,7 +5,7 @@ let fpdb = {
     list: [],
     pages: 0,
     currentPage: 1,
-    currentEntry: 0,
+    activeEntry: null,
     activePlayer: -1,
     lastScrollPos: 0,
     metaMap: {
@@ -141,10 +141,7 @@ fetch('fields.json').then(r => r.json()).then(async json => {
         
         performSearch();
     }
-    else if (location.hash.length == 37) {
-        fpdb.list = await fetch(`${fpdb.api}/search?id=${location.hash.substring(1)}`).then(r => r.json());
-        if (fpdb.list.length > 0) loadEntry();
-    }
+    else if (location.hash.length == 37) loadEntry();
 });
 
 fetch('sort.json').then(r => r.json()).then(json => {
@@ -236,7 +233,7 @@ function performSearch() {
     document.querySelector('.viewer').style.display = 'none';
     document.querySelector('.results > .common-loading').hidden = false;
     
-    fetch(`${fpdb.api}/search?${params.join('&')}`).then(r => r.json()).then(json => {
+    fetch(`${fpdb.api}/search?${params.join('&')}&fields=id,title,developer,publisher,platform,library,tags,originalDescription`).then(r => r.json()).then(json => {
         fpdb.list = json;
         pages = Math.ceil(fpdb.list.length / 100);
         
@@ -344,34 +341,33 @@ function loadPageFromInput(input) {
 }
 
 async function loadEntry(e) {
-    let i = 0;
+    let id;
     
     if (e != undefined) {
-        i = parseInt(e.target.getAttribute('view'));
-        if (isNaN(i)) return;
+        try { id = fpdb.list[e.target.getAttribute('view')].id; } catch { console.log('ugh!'); return; }
         document.querySelector('.viewer-back').style.visibility = 'visible';
     }
-    else if (fpdb.list.length > 0)
+    else if (location.hash.length == 37) {
+        id = location.hash.substring(1);
         document.querySelector('.viewer-back').style.visibility = 'hidden';
+    }
     else return;
     
-    fpdb.currentEntry = i;
-    fpdb.lastScrollPos = document.querySelector('.results').scrollTop;
-    
-    let entry = fpdb.list[fpdb.currentEntry];
-    
-    location.hash = entry.id;
+    location.hash = id;
     document.querySelector('.results-top').style.display = 'none';
     document.querySelector('.results-list').hidden = true;
     document.querySelector('.results-bottom').hidden = true;
     document.querySelector('.results > .common-loading').hidden = false;
     
+    fpdb.activeEntry = (await fetch(`${fpdb.api}/search?id=${id}&limit=1`).then(r => r.json()))[0];
+    fpdb.lastScrollPos = document.querySelector('.results').scrollTop;
+    
     document.querySelector('.viewer-play').hidden = (() => {
         let launchPath;
-        try { launchPath = new URL(entry.launchCommand).pathname; } catch { return true; }
+        try { launchPath = new URL(fpdb.activeEntry.launchCommand).pathname; } catch { return true; }
         
         for (let player of players) {
-            if (player.platforms.some(platform => entry.platform == platform)
+            if (player.platforms.some(platform => fpdb.activeEntry.platform == platform)
              && player.extensions.some(extension => launchPath.toLowerCase().endsWith(extension)))
                 return false;
         }
@@ -379,10 +375,10 @@ async function loadEntry(e) {
     })();
     
     let requests = [
-        `${fpdb.api}/logo?id=${entry.id}`,
-        `${fpdb.api}/screenshot?id=${entry.id}`,
-        `${fpdb.api}/addapps?id=${entry.id}`,
-        `${fpdb.api}/files?id=${entry.id}`,
+        `${fpdb.api}/logo?id=${fpdb.activeEntry.id}`,
+        `${fpdb.api}/screenshot?id=${fpdb.activeEntry.id}`,
+        `${fpdb.api}/addapps?id=${fpdb.activeEntry.id}`,
+        `${fpdb.api}/files?id=${fpdb.activeEntry.id}`,
     ];
     
     let responses = [];
@@ -403,7 +399,7 @@ async function loadEntry(e) {
         metaTable.removeChild(metaTable.firstChild);
     
     for (let field in fpdb.metaMap) {
-        if (entry[field].length > 0 || typeof(entry[field]) == 'boolean') {
+        if (fpdb.activeEntry[field].length > 0 || typeof(fpdb.activeEntry[field]) == 'boolean') {
             let row = document.createElement('tr'),
                 fieldName  = document.createElement('td'),
                 fieldValue = document.createElement('td');
@@ -412,13 +408,13 @@ async function loadEntry(e) {
             
             switch (field) {
                 case 'library':
-                    fieldValue.textContent = entry[field] == 'arcade'
+                    fieldValue.textContent = fpdb.activeEntry[field] == 'arcade'
                         ? 'Games'
                         : 'Animations';
                     break;
                 case 'tags':
                     let ul = document.createElement('ul');
-                    for (let tag of entry.tags) {
+                    for (let tag of fpdb.activeEntry.tags) {
                         let li = document.createElement('li');
                         li.textContent = tag;
                         ul.append(li);
@@ -426,14 +422,14 @@ async function loadEntry(e) {
                     fieldValue.append(ul);
                     break;
                 case 'releaseDate':
-                    fieldValue.textContent = new Date(entry[field]).toLocaleDateString(undefined, { timeZone: 'UTC' });
+                    fieldValue.textContent = new Date(fpdb.activeEntry[field]).toLocaleDateString(undefined, { timeZone: 'UTC' });
                     break;
                 case 'dateAdded':
                 case 'dateModified':
-                    fieldValue.textContent = new Date(entry[field]).toLocaleString();
+                    fieldValue.textContent = new Date(fpdb.activeEntry[field]).toLocaleString();
                     break;
                 case 'zipped':
-                    fieldValue.textContent = entry[field]
+                    fieldValue.textContent = fpdb.activeEntry[field]
                         ? "GameZIP"
                         : "Legacy";
                     break;
@@ -441,7 +437,7 @@ async function loadEntry(e) {
                 case 'originalDescription':
                     fieldValue.style.whiteSpace = 'pre-wrap';
                 default:
-                    fieldValue.textContent = entry[field];
+                    fieldValue.textContent = fpdb.activeEntry[field];
             }
             
             row.append(fieldName, fieldValue);
@@ -482,7 +478,7 @@ async function loadEntry(e) {
     }
     
     let fileList = document.querySelector('.viewer-file-list');
-    if (entry.zipped) {
+    if (fpdb.activeEntry.zipped) {
         while (fileList.firstChild)
             fileList.removeChild(fileList.firstChild);
         
@@ -514,9 +510,8 @@ async function loadEntry(e) {
     document.querySelector('.viewer').style.display = 'flex';
 }
 
-async function playEntry(launchCommand = fpdb.list[fpdb.currentEntry].launchCommand) {
-    let entry = fpdb.list[fpdb.currentEntry],
-        launchPath = new URL(launchCommand).pathname,
+async function playEntry() {
+    let launchPath = new URL(fpdb.activeEntry.launchCommand).pathname,
         activePlayer = -1;
     
     for (let i = 0; i < players.length; i++) {
@@ -529,7 +524,7 @@ async function playEntry(launchCommand = fpdb.list[fpdb.currentEntry].launchComm
             document.head.append(script);
             script.addEventListener('load', () => {
                 players[i].loaded = true;
-                if (!jsZip.loaded) loadJsZip(launchCommand);
+                if (!jsZip.loaded) loadJsZip(fpdb.activeEntry.launchCommand);
             });
         }
         
@@ -542,15 +537,15 @@ async function playEntry(launchCommand = fpdb.list[fpdb.currentEntry].launchComm
     document.querySelector('.player').style.display = 'inline-block';
     
     let gameZip;
-    if (entry.zipped) gameZip = await new JSZip().loadAsync(await fetch(`${fpdb.api}/get?id=${entry.id}`).then(r => r.blob()));
+    if (fpdb.activeEntry.zipped) gameZip = await new JSZip().loadAsync(await fetch(`${fpdb.api}/get?id=${fpdb.activeEntry.id}`).then(r => r.blob()));
     
     let redirect = async url => {
         let info = {
-            base: new URL(url.origin == location.origin ? url.pathname.substring(1) : url.href, launchCommand),
+            base: new URL(url.origin == location.origin ? url.pathname.substring(1) : url.href, fpdb.activeEntry.launchCommand),
             url: ''
         };
         
-        if (entry.zipped) {
+        if (fpdb.activeEntry.zipped) {
             let redirectedFile = gameZip.file(decodeURIComponent('content/' + info.base.hostname + info.base.pathname));
             if (redirectedFile != null) {
                 info.url = URL.createObjectURL(await redirectedFile.async('blob'));
@@ -593,16 +588,16 @@ async function playEntry(launchCommand = fpdb.list[fpdb.currentEntry].launchComm
         return element;
     };
     
-    players[activePlayer].instance = launchCommand;
+    players[activePlayer].instance = fpdb.activeEntry.launchCommand;
 }
 
-function loadJsZip(launchCommand) {
+function loadJsZip() {
     let script = document.createElement('script');
     script.src = jsZip.source;
     
     script.addEventListener('load', () => {
         jsZip.loaded = true;
-        playEntry(launchCommand);
+        playEntry();
     });
     
     document.head.append(script);
@@ -628,7 +623,7 @@ document.querySelectorAll('.results-go-to-page').forEach((elem, i) => elem.addEv
 document.querySelectorAll('.results-input-page').forEach(elem => elem.addEventListener('keyup', e => { if (e.key == 'Enter') loadPageFromInput(e.target); }));
 
 document.querySelector('.viewer-back').addEventListener('click', backToResults);
-document.querySelector('.viewer-play').addEventListener('click', () => playEntry());
+document.querySelector('.viewer-play').addEventListener('click', playEntry);
 
 document.querySelector('.player-overlay').addEventListener('click', e => {
     try {

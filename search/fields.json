@@ -44,12 +44,12 @@
     ]
   },
   {
-    "name": "tagsStr",
+    "name": "tags",
     "displayName": "Tag",
     "values": []
   },
   {
-    "name": "platformsStr",
+    "name": "platform",
     "displayName": "Platform",
     "values": []
   },
@@ -119,15 +119,15 @@
     "values": []
   },
   {
-    "name": "activeDataOnDisk",
+    "name": "zipped",
     "displayName": "Format",
     "values": [
       {
-        "name": "1",
+        "name": "true",
         "displayName": "GameZIP"
       },
       {
-        "name": "0",
+        "name": "false",
         "displayName": "Legacy"
       }
     ]
