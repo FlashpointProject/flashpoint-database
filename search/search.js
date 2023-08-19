@@ -67,6 +67,15 @@ const players = [
         loaded: false,
         index: -1,
         
+        get override() {
+            const player = window.RufflePlayer;
+            if (window.RufflePlayer != null) {
+                const extension = player.sources.extension;
+                return extension != null && Date.now() - new Date(extension.version.split('+')[1]).getTime() < 86400000;
+            }
+            return false;
+        },
+        
         redirectedElement: window.fetch,
         startRedirector() {
             let redirectedElement = this.redirectedElement;
@@ -86,6 +95,7 @@ const players = [
                 return response;
             };
         },
+        stopRedirector() { window.fetch = this.redirectedElement; },
         
         instance: null,
         async startPlayer(launchCommand) {
@@ -112,8 +122,6 @@ const players = [
                 this.instance.style.display = 'inline-block';
             });
         },
-        
-        stopRedirector() { window.fetch = this.redirectedElement; },
         stopPlayer() { this.instance.pause(); }
     },
     {
@@ -122,6 +130,8 @@ const players = [
         extensions: [ '.wrl', '.wrl.gz', '.x3d' ],
         loaded: false,
         index: -1,
+        
+        get override() { return false; },
         
         redirectedElement: document.createElement,
         startRedirector() {
@@ -139,6 +149,7 @@ const players = [
                 return element;
             };
         },
+        stopRedirector() { document.createElement = this.redirectedElement; },
         
         instance: null,
         async startPlayer(launchCommand) {
@@ -163,9 +174,7 @@ const players = [
             
             this.instance.style.display = 'inline-block';
         },
-        
-        stopRedirector() { document.createElement = this.redirectedElement; },
-        stopPlayer() { this.instance.replaceWorld(null); },
+        stopPlayer() { this.instance.replaceWorld(null); }
     }
 ];
 players.forEach((player, i) => player.index = i);
@@ -571,46 +580,38 @@ async function loadEntry(e) {
 
 async function playEntry(launchCommand = fpdb.activeEntry.launchCommand) {
     let launchPath = new URL(launchCommand).pathname,
-        activePlayer = -1;
+        p = players.findIndex(player => player.extensions.some(ext => launchPath.toLowerCase().endsWith(ext)));
     
-    for (let i = 0; i < players.length; i++) {
-        if (!players[i].extensions.some(ext => launchPath.toLowerCase().endsWith(ext))) continue;
-        
-        if (!players[i].loaded) {
+    if (p == -1) return;
+    
+    await Promise.all([new Promise(resolve => {
+        if (!players[p].loaded && !players[p].override) {
             let script = document.createElement('script');
-            script.src = players[i].source;
+            script.src = players[p].source;
+            script.addEventListener('load', resolve);
             
             document.head.append(script);
-            script.addEventListener('load', () => {
-                players[i].loaded = true;
-                if (!jsZip.loaded) loadJsZip(launchCommand);
-            });
+            players[p].loaded = true;
         }
-        
-        if (!jsZip.loaded) return;
-        
-        activePlayer = i;
-        break;
-    }
+        else resolve();
+    }), new Promise(resolve => {
+        if (!jsZip.loaded) {
+            let script = document.createElement('script');
+            script.src = jsZip.source;
+            script.addEventListener('load', resolve);
+            
+            document.head.append(script);
+            jsZip.loaded = true;
+        }
+        else resolve();
+    })]);
     
     document.querySelector('.player').style.display = 'inline-block';
     
     if (fpdb.activeEntry.zipped) gameZip = await new JSZip().loadAsync(await fetch(`${fpdb.api}/get?id=${fpdb.activeEntry.id}`).then(r => r.blob()));
     
-    players[activePlayer].startRedirector();
-    players[activePlayer].startPlayer(launchCommand);
-}
-
-function loadJsZip(launchCommand) {
-    let script = document.createElement('script');
-    script.src = jsZip.source;
-    
-    script.addEventListener('load', () => {
-        jsZip.loaded = true;
-        playEntry(launchCommand);
-    });
-    
-    document.head.append(script);
+    players[p].startRedirector();
+    players[p].startPlayer(launchCommand);
 }
 
 function backToResults() {
