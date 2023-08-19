@@ -34,5 +34,10 @@
     "fields": [
       "dateModified"
     ]
+  },
+  {
+    "name": "random",
+    "displayName": "Random",
+    "fields": []
   }
 ]

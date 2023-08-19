@@ -299,7 +299,7 @@ function performSearch() {
     document.querySelector('.viewer').style.display = 'none';
     document.querySelector('.results > .common-loading').hidden = false;
     
-    fetch(`${fpdb.api}/search?${params.join('&')}&fields=id,title,developer,publisher,platform,library,tags,originalDescription`).then(r => r.json()).then(json => {
+    fetch(`${fpdb.api}/search?${params.join('&')}&fields=id,title,developer,publisher,platform,library,tags,originalDescription,dateAdded,dateModified`).then(r => r.json()).then(json => {
         fpdb.list = json;
         pages = Math.ceil(fpdb.list.length / 100);
         
@@ -316,17 +316,25 @@ function performSearch() {
 }
 
 function applySort() {
-    let fields = fpdb.sortOptions[document.querySelector('.results-sort-options').selectedIndex].fields,
+    let sortOption = fpdb.sortOptions[document.querySelector('.results-sort-options').selectedIndex],
         direction = document.querySelector('.results-sort-direction').selectedIndex == 0 ? 1 : -1;
     
-    fpdb.list = fpdb.list.sort((a, b) => {
-        let i = 0;
-        while (i < fields.length) {
-            let compare = a[fields[i]].localeCompare(b[fields[i]], 'en', { sensitivity: 'base' });
-            if (compare == 0) i++; else return compare * direction;
+    if (sortOption.name != 'random') {
+        fpdb.list = fpdb.list.sort((a, b) => {
+            let i = 0;
+            while (i < sortOption.fields.length) {
+                let compare = a[sortOption.fields[i]].localeCompare(b[sortOption.fields[i]], 'en', { sensitivity: 'base' });
+                if (compare == 0) i++; else return compare * direction;
+            }
+            return a.title.localeCompare(b.title, 'en', { sensitivity: 'base' }) * direction;
+        });
+    }
+    else {
+        for (let i = fpdb.list.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            [fpdb.list[i], fpdb.list[j]] = [fpdb.list[j], fpdb.list[i]];
         }
-        return a.title.localeCompare(b.title, 'en', { sensitivity: 'base' }) * direction;
-    });
+    }
     
     loadPage(1);
 }
