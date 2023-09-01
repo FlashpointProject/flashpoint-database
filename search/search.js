@@ -1,12 +1,11 @@
 let fpdb = {
-    api: 'https://db-api.unstable.life',
+    api: 'http://127.0.0.1:8986',
+    images: 'https://infinity.unstable.life/images',
     platforms: [],
     sortOptions: [],
     list: [],
     pages: 0,
     currentPage: 1,
-    activeEntry: null,
-    activePlayer: -1,
     lastScrollPos: 0,
     metaMap: {
         title:               "Title",
@@ -28,7 +27,7 @@ let fpdb = {
         dateModified:        "Last Modified",
         applicationPath:     "Application Path",
         launchCommand:       "Launch Command",
-        zipped:              "Format",
+        fileName:            "Format",
         id:                  "ID"
     },
     addAppMap: {
@@ -37,151 +36,6 @@ let fpdb = {
         launchCommand:       "Launch Command",
         id:                  "ID"
     }
-};
-
-let gameZip = null;
-
-const redirect = async request => {
-    let url = {
-        original: new URL([location.origin, fpdb.api].some(origin => origin == request.origin) ? request.pathname.substring(1) : request.href, fpdb.activeEntry.launchCommand),
-        redirect: ''
-    };
-    
-    if (gameZip != null) {
-        let redirectedFile = gameZip.file(decodeURIComponent('content/' + url.original.hostname + url.original.pathname));
-        if (redirectedFile != null) {
-            url.redirect = URL.createObjectURL(await redirectedFile.async('blob'));
-            return url;
-        }
-    }
-    
-    url.redirect = `${fpdb.api}/get?url=${url.original.hostname + url.original.pathname}`;
-    return url;
-};
-
-const players = [
-    {
-        source: 'https://unpkg.com/@ruffle-rs/ruffle',
-        platforms: [ 'Flash' ],
-        extensions: [ '.swf' ],
-        loaded: false,
-        index: -1,
-        
-        get override() {
-            const player = window.RufflePlayer;
-            if (window.RufflePlayer != null) {
-                const extension = player.sources.extension;
-                return extension != null && Date.now() - new Date(extension.version.split('+')[1]).getTime() < 86400000;
-            }
-            return false;
-        },
-        
-        redirectedElement: window.fetch,
-        startRedirector() {
-            let redirectedElement = this.redirectedElement;
-            window.fetch = async (resource, options) => {
-                let resourceURL = new URL(resource instanceof Request ? resource.url : resource);
-                
-                if (resourceURL.protocol == 'blob:')
-                    resourceURL = new URL(resourceURL.pathname);
-                
-                if (resourceURL.hostname == 'unpkg.com' || !resourceURL.protocol.startsWith('http'))
-                    return await redirectedElement(resource, options);
-                
-                let redirectInfo = await redirect(resourceURL),
-                    response = await redirectedElement(redirectInfo.redirect, options);
-                
-                Object.defineProperty(response, 'url', { value: redirectInfo.original.href });
-                return response;
-            };
-        },
-        stopRedirector() { window.fetch = this.redirectedElement; },
-        
-        instance: null,
-        async startPlayer(launchCommand) {
-            if (fpdb.activePlayer != this.index) {
-                document.querySelectorAll('.player-instance').forEach(elem => elem.remove());
-                
-                this.instance = window.RufflePlayer.newest().createPlayer();
-                this.instance.className = 'player-instance';
-                this.instance.config.allowScriptAccess = true;
-                
-                document.querySelector('.player').append(this.instance);
-                
-                fpdb.activePlayer = this.index;
-            }
-            
-            this.instance.config.base = launchCommand.substring(0, launchCommand.lastIndexOf('/') + 1);
-            this.instance.load(launchCommand);
-            
-            this.instance.addEventListener('loadedmetadata', () => {
-                if (this.instance.metadata.width > 1 && this.instance.metadata.height > 1) {
-                    this.instance.style.width  = this.instance.metadata.width  + 'px';
-                    this.instance.style.height = this.instance.metadata.height + 'px';
-                }
-                this.instance.style.display = 'inline-block';
-            });
-        },
-        stopPlayer() { this.instance.pause(); }
-    },
-    {
-        source: 'https://create3000.github.io/code/x_ite/latest/x_ite.min.js',
-        platforms: [ 'VRML', 'X3D' ],
-        extensions: [ '.wrl', '.wrl.gz', '.x3d' ],
-        loaded: false,
-        index: -1,
-        
-        get override() { return false; },
-        
-        redirectedElement: document.createElement,
-        startRedirector() {
-            let redirectedElement = this.redirectedElement;
-            document.createElement = function(...args) {
-                let observer = new MutationObserver(async records => {
-                    let r = records.findIndex(record => !['blob:', fpdb.api + '/get?'].some(prefix => record.target.src.startsWith(prefix)));
-                    if (r != -1) records[r].target.src = (await redirect(new URL(records[r].target.src))).redirect;
-                });
-                
-                let element = redirectedElement.apply(this, args);
-                if (element.tagName == 'IMG')
-                    observer.observe(element, { attributes: true, attributeFilter: ['src'] });
-                
-                return element;
-            };
-        },
-        stopRedirector() { document.createElement = this.redirectedElement; },
-        
-        instance: null,
-        async startPlayer(launchCommand) {
-            if (fpdb.activePlayer != this.index) {
-                document.querySelectorAll('.player-instance').forEach(elem => elem.remove());
-                
-                this.instance = X3D.createBrowser();
-                this.instance.className = 'player-instance';
-                
-                this.instance.style.maxWidth = '800px';
-                this.instance.style.maxHeight = '600px';
-                this.instance.style.width = '100%';
-                this.instance.style.height = '100%';
-                
-                document.querySelector('.player').append(this.instance);
-                
-                fpdb.activePlayer = this.index;
-            }
-            
-            this.instance.browser.baseURL = launchCommand.substring(0, launchCommand.lastIndexOf('/') + 1);
-            this.instance.browser.loadURL(new X3D.MFString((await redirect(new URL(launchCommand))).redirect));
-            
-            this.instance.style.display = 'inline-block';
-        },
-        stopPlayer() { this.instance.replaceWorld(null); }
-    }
-];
-players.forEach((player, i) => player.index = i);
-
-const jsZip = {
-    source: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
-    loaded: false
 };
 
 fetch(fpdb.api + '/platforms').then(r => r.json()).then(json => { fpdb.platforms = json; });
@@ -355,14 +209,14 @@ function loadPage(page) {
         let logo = document.createElement('div');
         logo.className = 'entry-logo';
         logo.setAttribute('view', i);
-        logo.style.backgroundImage = `url("${fpdb.api}/logo?id=${fpdb.list[i].id}&format=jpeg&quality=40&width=128")`;
+        logo.style.backgroundImage = `url("${fpdb.images}/Logos/${fpdb.list[i].id.substring(0, 2)}/${fpdb.list[i].id.substring(2, 4)}/${fpdb.list[i].id}.png?type=jpg")`;
         logo.addEventListener('click', loadEntry);
         
         let text = document.createElement('div');
         text.className = 'entry-text';
         
-        let header = document.createElement('div');
-        let subHeader = document.createElement('div');
+        let header = document.createElement('div'),
+            subHeader = document.createElement('div');
         
         let title = document.createElement('a');
         title.classList.add('entry-title', 'common-activate');
@@ -418,7 +272,7 @@ async function loadEntry(e) {
     let id;
     
     if (e != undefined) {
-        try { id = fpdb.list[e.target.getAttribute('view')].id; } catch { console.log('ugh!'); return; }
+        try { id = fpdb.list[e.target.getAttribute('view')].id; } catch { return; }
         document.querySelector('.viewer-back').style.visibility = 'visible';
     }
     else if (location.hash.length == 37) {
@@ -435,47 +289,42 @@ async function loadEntry(e) {
     document.querySelector('.results-bottom').hidden = true;
     document.querySelector('.results > .common-loading').hidden = false;
     
-    fpdb.activeEntry = (await fetch(`${fpdb.api}/search?id=${id}&limit=1`).then(r => r.json()))[0];
+    let entry = (await fetch(`${fpdb.api}/search?id=${id}&limit=1`).then(r => r.json()))[0];
     
     document.querySelector('.viewer-play').hidden = (() => {
         let launchPath;
-        try { launchPath = new URL(fpdb.activeEntry.launchCommand).pathname; } catch { return true; }
+        try { launchPath = new URL(entry.launchCommand).pathname; } catch { return true; }
         
-        for (let player of players) {
-            if (player.extensions.some(extension => launchPath.toLowerCase().endsWith(extension)))
-                return false;
+        if (['.swf', '.wrl', '.wrl.gz', '.x3d'].some(ext => launchPath.toLowerCase().endsWith(ext))) {
+            document.querySelector('.viewer-play').href = 'https://ooooooooo.ooo/static/?' + id;
+            return false;
         }
-        return true;
+        else return true;
     })();
     
-    let requests = [
-        `${fpdb.api}/logo?id=${fpdb.activeEntry.id}&width=320`,
-        `${fpdb.api}/screenshot?id=${fpdb.activeEntry.id}&width=480`,
-        `${fpdb.api}/addapps?id=${fpdb.activeEntry.id}`,
-        `${fpdb.api}/files?id=${fpdb.activeEntry.id}`,
-    ];
+    let logo = `${fpdb.images}/Logos/${id.substring(0, 2)}/${id.substring(2, 4)}/${id}.png`,
+        screenshot = `${fpdb.images}/Screenshots/${id.substring(0, 2)}/${id.substring(2, 4)}/${id}.png`;
     
-    let responses = [];
+    document.querySelector('.viewer-logo a').href = logo;
+    document.querySelector('.viewer-screenshot a').href = screenshot;
     
-    for (let url of requests)
-        responses.push(fetch(url));
-    
-    let logo       = await responses[0].then(r => r.blob()),
-        screenshot = await responses[1].then(r => r.blob()),
-        addApps    = await responses[2].then(r => r.json()),
-        files      = await responses[3].then(r => r.json());
-    
-    document.querySelector('.viewer-logo img').src = URL.createObjectURL(logo);
-    document.querySelector('.viewer-screenshot img').src = URL.createObjectURL(screenshot);
-    document.querySelector('.viewer-logo a').href = `${fpdb.api}/logo?id=${fpdb.activeEntry.id}`;
-    document.querySelector('.viewer-screenshot a').href = `${fpdb.api}/screenshot?id=${fpdb.activeEntry.id}`;
+    try {
+        document.querySelector('.viewer-logo img').src = URL.createObjectURL(await fetch(logo + '?type=jpg').then(r => r.blob()));
+        document.querySelector('.viewer-screenshot img').src = URL.createObjectURL(await fetch(screenshot + '?type=jpg').then(r => r.blob()));
+        document.querySelector('.viewer-images').style.display = 'flex';
+        document.querySelector('.viewer-no-images').style.display = 'none';
+    }
+    catch {
+        document.querySelector('.viewer-images').style.display = 'none';
+        document.querySelector('.viewer-no-images').style.display = 'initial';
+    }
     
     let metaTable = document.querySelector('.viewer-metadata');
     while (metaTable.firstChild)
         metaTable.removeChild(metaTable.firstChild);
     
     for (let field in fpdb.metaMap) {
-        if (fpdb.activeEntry[field].length > 0 || typeof(fpdb.activeEntry[field]) == 'boolean') {
+        if (entry[field].length > 0 || typeof(entry[field]) == 'boolean') {
             let row = document.createElement('tr'),
                 fieldName  = document.createElement('td'),
                 fieldValue = document.createElement('td');
@@ -484,13 +333,13 @@ async function loadEntry(e) {
             
             switch (field) {
                 case 'library':
-                    fieldValue.textContent = fpdb.activeEntry[field] == 'arcade'
+                    fieldValue.textContent = entry[field] == 'arcade'
                         ? 'Games'
                         : 'Animations';
                     break;
                 case 'tags':
                     let ul = document.createElement('ul');
-                    for (let tag of fpdb.activeEntry.tags) {
+                    for (let tag of entry.tags) {
                         let li = document.createElement('li');
                         li.textContent = tag;
                         ul.append(li);
@@ -498,22 +347,22 @@ async function loadEntry(e) {
                     fieldValue.append(ul);
                     break;
                 case 'releaseDate':
-                    fieldValue.textContent = new Date(fpdb.activeEntry[field]).toLocaleDateString(undefined, { timeZone: 'UTC' });
+                    fieldValue.textContent = new Date(entry[field]).toLocaleDateString(undefined, { timeZone: 'UTC' });
                     break;
                 case 'dateAdded':
                 case 'dateModified':
-                    fieldValue.textContent = new Date(fpdb.activeEntry[field]).toLocaleString();
+                    fieldValue.textContent = new Date(entry[field]).toLocaleString();
                     break;
-                case 'zipped':
-                    fieldValue.textContent = fpdb.activeEntry[field]
-                        ? "GameZIP"
-                        : "Legacy";
+                case 'fileName':
+                    fieldValue.textContent = entry[field] == ''
+                        ? 'Legacy'
+                        : 'GameZIP';
                     break;
                 case 'notes':
                 case 'originalDescription':
                     fieldValue.style.whiteSpace = 'pre-wrap';
                 default:
-                    fieldValue.textContent = fpdb.activeEntry[field];
+                    fieldValue.textContent = entry[field];
             }
             
             row.append(fieldName, fieldValue);
@@ -521,7 +370,8 @@ async function loadEntry(e) {
         }
     }
     
-    let addAppTables = document.querySelector('.viewer-add-apps');
+    let addApps = await fetch(`${fpdb.api}/addapps?id=${id}`).then(r => r.json()),
+        addAppTables = document.querySelector('.viewer-add-apps');
     if (addApps.length > 0) {
         while (addAppTables.firstChild)
             addAppTables.removeChild(addAppTables.firstChild);
@@ -553,73 +403,8 @@ async function loadEntry(e) {
         document.querySelector('.viewer-no-add-apps').hidden = false;
     }
     
-    let fileList = document.querySelector('.viewer-file-list');
-    if (fpdb.activeEntry.zipped) {
-        while (fileList.firstChild)
-            fileList.removeChild(fileList.firstChild);
-        
-        for (let file of files) {
-            let span = document.createElement('span');
-            span.textContent = file;
-            
-            for (let player of players) {
-                let fileURL = 'http://' + file;
-                if (player.extensions.some(extension => fileURL.toLowerCase().endsWith(extension))) {
-                    span.className = 'common-activate';
-                    span.addEventListener('click', () => playEntry(fileURL));
-                    break;
-                }
-            }
-            
-            fileList.append(span);
-        }
-        
-        fileList.style.display = 'flex';
-        document.querySelector('.viewer-no-file-list').hidden = true;
-    }
-    else {
-        fileList.style.display = 'none';
-        document.querySelector('.viewer-no-file-list').hidden = false;
-    }
-    
     document.querySelector('.results > .common-loading').hidden = true;
     document.querySelector('.viewer').style.display = 'flex';
-}
-
-async function playEntry(launchCommand = fpdb.activeEntry.launchCommand) {
-    let launchPath = new URL(launchCommand).pathname,
-        p = players.findIndex(player => player.extensions.some(ext => launchPath.toLowerCase().endsWith(ext)));
-    
-    if (p == -1) return;
-    
-    await Promise.all([new Promise(resolve => {
-        if (!players[p].loaded && !players[p].override) {
-            let script = document.createElement('script');
-            script.src = players[p].source;
-            script.addEventListener('load', resolve);
-            
-            document.head.append(script);
-            players[p].loaded = true;
-        }
-        else resolve();
-    }), new Promise(resolve => {
-        if (!jsZip.loaded) {
-            let script = document.createElement('script');
-            script.src = jsZip.source;
-            script.addEventListener('load', resolve);
-            
-            document.head.append(script);
-            jsZip.loaded = true;
-        }
-        else resolve();
-    })]);
-    
-    document.querySelector('.player').style.display = 'inline-block';
-    
-    if (fpdb.activeEntry.zipped) gameZip = await new JSZip().loadAsync(await fetch(`${fpdb.api}/get?id=${fpdb.activeEntry.id}`).then(r => r.blob()));
-    
-    players[p].startRedirector();
-    players[p].startPlayer(launchCommand);
 }
 
 function backToResults() {
@@ -642,15 +427,3 @@ document.querySelectorAll('.results-go-to-page').forEach((elem, i) => elem.addEv
 document.querySelectorAll('.results-input-page').forEach(elem => elem.addEventListener('keyup', e => { if (e.key == 'Enter') loadPageFromInput(e.target); }));
 
 document.querySelector('.viewer-back').addEventListener('click', backToResults);
-document.querySelector('.viewer-play').addEventListener('click', () => playEntry());
-
-document.querySelector('.player-overlay').addEventListener('click', e => {
-    try {
-        document.querySelector('.player-instance').style.display = 'none';
-        players[fpdb.activePlayer].stopPlayer();
-    }
-    catch {}
-    
-    e.target.parentNode.style.display = 'none';
-    players[fpdb.activePlayer].stopRedirector();
-});

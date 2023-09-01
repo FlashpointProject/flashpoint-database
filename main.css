@@ -345,37 +345,6 @@ body {
 .viewer-add-apps table:not(:first-child) {
     margin-top: 0.7rem;
 }
-.viewer-file-list {
-    font-family: monospace;
-    background-color: #0001;
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    word-break: break-all;
-}
-.viewer-file-list span {
-    margin-right: auto;
-}
-
-.player {
-    width: 100vw;
-    height: 100vh;
-    display: none;
-    position: absolute;
-    top: 0; left: 0;
-    z-index: 1;
-}
-.player-instance {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-}
-.player-overlay {
-    width: 100%;
-    height: 100%;
-    background-color: #000b;
-}
 
 .download-center {
     max-width: 70rem;
