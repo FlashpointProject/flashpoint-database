@@ -273,11 +273,11 @@ async function loadEntry(e) {
     
     if (e != undefined) {
         try { id = fpdb.list[e.target.getAttribute('view')].id; } catch { return; }
-        document.querySelector('.viewer-back').style.visibility = 'visible';
+        document.querySelector('.viewer-back').hidden = false;
     }
     else if (location.hash.length == 37) {
         id = location.hash.substring(1);
-        document.querySelector('.viewer-back').style.visibility = 'hidden';
+        document.querySelector('.viewer-back').hidden = true;
     }
     else return;
     

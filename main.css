@@ -313,8 +313,14 @@ body {
 .viewer-header {
     display: flex;
 }
-.viewer-back {
-    margin-right: auto;
+.viewer-header:has(.viewer-back:not([hidden]), .viewer-play:not([hidden])) {
+    margin-bottom: 1rem;
+}
+.viewer-header + .common-subheader {
+    margin-top: 0;
+}
+.viewer-play {
+    margin-left: auto;
 }
 .viewer-images {
     display: flex;
