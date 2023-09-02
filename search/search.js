@@ -291,15 +291,15 @@ async function loadEntry(e) {
     
     let entry = (await fetch(`${fpdb.api}/search?id=${id}&limit=1`).then(r => r.json()))[0];
     
-    document.querySelector('.viewer-play').hidden = (() => {
+    document.querySelector('.viewer-play').style.display = (() => {
         let launchPath;
         try { launchPath = new URL(entry.launchCommand).pathname; } catch { return true; }
         
         if (['.swf', '.wrl', '.wrl.gz', '.x3d'].some(ext => launchPath.toLowerCase().endsWith(ext))) {
             document.querySelector('.viewer-play').href = 'https://ooooooooo.ooo/static/?' + id;
-            return false;
+            return 'unset';
         }
-        else return true;
+        else return 'none';
     })();
     
     let logo = `${fpdb.images}/Logos/${id.substring(0, 2)}/${id.substring(2, 4)}/${id}.png`,
@@ -392,11 +392,11 @@ async function loadEntry(e) {
         }
         
         addAppTables.hidden = false;
-        document.querySelector('.viewer-no-add-apps').hidden = true;
+        document.querySelector('.viewer-add-apps-header').hidden = false;
     }
     else {
         addAppTables.hidden = true;
-        document.querySelector('.viewer-no-add-apps').hidden = false;
+        document.querySelector('.viewer-add-apps-header').hidden = true;
     }
     
     document.querySelector('.results > .common-loading').hidden = true;

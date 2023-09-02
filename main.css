@@ -313,11 +313,11 @@ body {
 .viewer-header {
     display: flex;
 }
-.viewer-header:has(.viewer-back:not([hidden]), .viewer-play:not([hidden])) {
-    margin-bottom: 1rem;
-}
 .viewer-header + .common-subheader {
     margin-top: 0;
+}
+.viewer-back, .viewer-play {
+    margin-bottom: 1rem;
 }
 .viewer-play {
     margin-left: auto;
