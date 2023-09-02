@@ -320,7 +320,7 @@ body {
     display: flex;
 }
 .viewer-logo, .viewer-screenshot {
-    max-height: 20rem;
+    height: 15rem;
     border: 0.15rem solid #0002;
 }
 .viewer-logo {

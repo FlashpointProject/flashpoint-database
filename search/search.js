@@ -306,18 +306,14 @@ async function loadEntry(e) {
         screenshot = `${fpdb.images}/Screenshots/${id.substring(0, 2)}/${id.substring(2, 4)}/${id}.png`;
     
     document.querySelector('.viewer-logo a').href = logo;
-    document.querySelector('.viewer-screenshot a').href = screenshot;
+    document.querySelector('.viewer-logo img').style.visibility = 'hidden';
+    document.querySelector('.viewer-logo img').addEventListener('load', e => e.target.style.visibility = 'visible');
+    document.querySelector('.viewer-logo img').src = logo + '?type=jpg';
     
-    try {
-        document.querySelector('.viewer-logo img').src = URL.createObjectURL(await fetch(logo + '?type=jpg').then(r => r.blob()));
-        document.querySelector('.viewer-screenshot img').src = URL.createObjectURL(await fetch(screenshot + '?type=jpg').then(r => r.blob()));
-        document.querySelector('.viewer-images').style.display = 'flex';
-        document.querySelector('.viewer-no-images').style.display = 'none';
-    }
-    catch {
-        document.querySelector('.viewer-images').style.display = 'none';
-        document.querySelector('.viewer-no-images').style.display = 'initial';
-    }
+    document.querySelector('.viewer-screenshot a').href = screenshot;
+    document.querySelector('.viewer-screenshot img').style.visibility = 'hidden';
+    document.querySelector('.viewer-screenshot img').addEventListener('load', e => e.target.style.visibility = 'visible');
+    document.querySelector('.viewer-screenshot img').src = screenshot + '?type=jpg';
     
     let metaTable = document.querySelector('.viewer-metadata');
     while (metaTable.firstChild)
