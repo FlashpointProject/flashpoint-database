@@ -27,7 +27,7 @@ let fpdb = {
         dateModified:        "Last Modified",
         applicationPath:     "Application Path",
         launchCommand:       "Launch Command",
-        fileName:            "Format",
+        zipped:              "Format",
         id:                  "ID"
     },
     addAppMap: {
@@ -349,10 +349,8 @@ async function loadEntry(e) {
                 case 'dateModified':
                     fieldValue.textContent = new Date(entry[field]).toLocaleString();
                     break;
-                case 'fileName':
-                    fieldValue.textContent = entry[field] == ''
-                        ? 'Legacy'
-                        : 'GameZIP';
+                case 'zipped':
+                    fieldValue.textContent = entry[field] ? 'GameZIP' : 'Legacy';
                     break;
                 case 'notes':
                 case 'originalDescription':
