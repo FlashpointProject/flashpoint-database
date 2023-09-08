@@ -155,15 +155,15 @@ function performSearch() {
     
     fetch(`${fpdb.api}/search?${params.join('&')}&fields=id,title,developer,publisher,platform,library,tags,originalDescription,dateAdded,dateModified`).then(r => r.json()).then(json => {
         fpdb.list = json;
-        pages = Math.ceil(fpdb.list.length / 100);
+        fpdb.pages = Math.ceil(fpdb.list.length / 100);
         
         document.querySelector('.results-total').textContent = fpdb.list.length.toLocaleString();
-        document.querySelectorAll('.results-max-pages').forEach(elem => { elem.textContent = pages.toLocaleString(); });
+        document.querySelectorAll('.results-max-pages').forEach(elem => { elem.textContent = fpdb.pages.toLocaleString(); });
         
         document.querySelector('.results > .common-loading').hidden = true;
         document.querySelector('.results-top').style.display = 'flex';
         document.querySelector('.results-list').hidden = false;
-        document.querySelectorAll('.results-navigate').forEach(elem => { elem.hidden = pages < 2; });
+        document.querySelectorAll('.results-navigate').forEach(elem => { elem.hidden = fpdb.pages < 2; });
         
         applySort();
     });
@@ -198,8 +198,8 @@ function loadPage(page) {
     while (htmlList.firstChild)
         htmlList.removeChild(htmlList.firstChild);
     
-    currentPage = page;
-    document.querySelectorAll('.results-current-page').forEach(elem => { elem.textContent = currentPage.toLocaleString(); });
+    fpdb.currentPage = page;
+    document.querySelectorAll('.results-current-page').forEach(elem => { elem.textContent = fpdb.currentPage.toLocaleString(); });
     document.querySelector('.results').scrollTop = 0;
     
     for (let i = (page - 1) * 100; i < Math.min(fpdb.list.length, page * 100); i++) {
@@ -262,7 +262,7 @@ function loadPage(page) {
 function loadPageFromInput(input) {
     let value = parseInt(input.value, 10);
     
-    if (!isNaN(value) && value != currentPage && value > 0 && value <= pages) {
+    if (!isNaN(value) && value != fpdb.currentPage && value > 0 && value <= fpdb.pages) {
         loadPage(value);
         input.value = '';
     }
@@ -406,16 +406,16 @@ function backToResults() {
     document.querySelector('.viewer').style.display = 'none';
     document.querySelector('.results-top').style.display = 'flex';
     document.querySelector('.results-list').hidden = false;
-    document.querySelector('.results-bottom').hidden = pages < 2;
+    document.querySelector('.results-bottom').hidden = fpdb.pages < 2;
     document.querySelector('.results').scrollTop = fpdb.lastScrollPos;
 }
 
 document.querySelector('.search-button').addEventListener('click', performSearch);
 
-document.querySelectorAll('.results-first-page').forEach(elem => elem.addEventListener('click', () => { if (currentPage > 1) loadPage(1); }));
-document.querySelectorAll('.results-back-page').forEach(elem => elem.addEventListener('click', () => { if (currentPage > 1) loadPage(currentPage - 1); }));
-document.querySelectorAll('.results-forward-page').forEach(elem => elem.addEventListener('click', () => { if (currentPage < pages) loadPage(currentPage + 1); }));
-document.querySelectorAll('.results-last-page').forEach(elem => elem.addEventListener('click', () => { if (currentPage < pages) loadPage(pages); }));
+document.querySelectorAll('.results-first-page').forEach(elem => elem.addEventListener('click', () => { if (fpdb.currentPage > 1) loadPage(1); }));
+document.querySelectorAll('.results-back-page').forEach(elem => elem.addEventListener('click', () => { if (fpdb.currentPage > 1) loadPage(fpdb.currentPage - 1); }));
+document.querySelectorAll('.results-forward-page').forEach(elem => elem.addEventListener('click', () => { if (fpdb.currentPage < fpdb.pages) loadPage(fpdb.currentPage + 1); }));
+document.querySelectorAll('.results-last-page').forEach(elem => elem.addEventListener('click', () => { if (fpdb.currentPage < fpdb.pages) loadPage(fpdb.pages); }));
 
 document.querySelectorAll('.results-go-to-page').forEach((elem, i) => elem.addEventListener('click', () => loadPageFromInput(document.querySelectorAll('.results-input-page')[i])));
 document.querySelectorAll('.results-input-page').forEach(elem => elem.addEventListener('keyup', e => { if (e.key == 'Enter') loadPageFromInput(e.target); }));
