@@ -1,15 +1,8 @@
 let fpdb = {
     api: 'https://db-api.unstable.life',
     images: 'https://infinity.unstable.life/images',
-    platforms: [],
-    sortOptions: [],
-    list: [],
-    pages: 0,
-    currentPage: 1,
     resultsPerPage: 100,
-    displayedResults: 0,
     thumbnailLimit: 1000,
-    lastScrollPos: 0,
     metaMap: {
         title:               "Title",
         alternateTitles:     "Alternate Titles",
@@ -38,7 +31,15 @@ let fpdb = {
         applicationPath:     "Application Path",
         launchCommand:       "Launch Command",
         id:                  "ID"
-    }
+    },
+    
+    platforms: [],
+    sortOptions: [],
+    list: [],
+    pages: 0,
+    currentPage: 1,
+    displayedResults: 0,
+    lastScrollPos: 0
 };
 
 fetch(fpdb.api + '/platforms').then(r => r.json()).then(json => { fpdb.platforms = json; });
