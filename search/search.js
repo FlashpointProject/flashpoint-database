@@ -6,6 +6,9 @@ let fpdb = {
     list: [],
     pages: 0,
     currentPage: 1,
+    resultsPerPage: 100,
+    displayedResults: 0,
+    thumbnailLimit: 1000,
     lastScrollPos: 0,
     metaMap: {
         title:               "Title",
@@ -155,7 +158,17 @@ function performSearch() {
     
     fetch(`${fpdb.api}/search?${params.join('&')}&fields=id,title,developer,publisher,platform,library,tags,originalDescription,dateAdded,dateModified`).then(r => r.json()).then(json => {
         fpdb.list = json;
-        fpdb.pages = Math.ceil(fpdb.list.length / 100);
+        
+        if (document.querySelector('#paginate').checked) {
+            fpdb.pages = Math.ceil(fpdb.list.length / fpdb.resultsPerPage);
+            fpdb.displayedResults = fpdb.resultsPerPage;
+            document.querySelector('.results-per-page').hidden = false;
+        }
+        else {
+            fpdb.pages = 1;
+            fpdb.displayedResults = fpdb.list.length;
+            document.querySelector('.results-per-page').hidden = true;
+        }
         
         document.querySelector('.results-total').textContent = fpdb.list.length.toLocaleString();
         document.querySelectorAll('.results-max-pages').forEach(elem => { elem.textContent = fpdb.pages.toLocaleString(); });
@@ -202,15 +215,18 @@ function loadPage(page) {
     document.querySelectorAll('.results-current-page').forEach(elem => { elem.textContent = fpdb.currentPage.toLocaleString(); });
     document.querySelector('.results').scrollTop = 0;
     
-    for (let i = (page - 1) * 100; i < Math.min(fpdb.list.length, page * 100); i++) {
+    for (let i = (page - 1) * fpdb.displayedResults; i < Math.min(fpdb.list.length, page * fpdb.displayedResults); i++) {
         let entry = document.createElement('div')
         entry.className = 'entry';
         
-        let logo = document.createElement('div');
-        logo.className = 'entry-logo';
-        logo.setAttribute('view', i);
-        logo.style.backgroundImage = `url("${fpdb.images}/Logos/${fpdb.list[i].id.substring(0, 2)}/${fpdb.list[i].id.substring(2, 4)}/${fpdb.list[i].id}.png?type=jpg")`;
-        logo.addEventListener('click', loadEntry);
+        if (fpdb.displayedResults < fpdb.thumbnailLimit) {
+            let logo = document.createElement('div');
+            logo.className = 'entry-logo';
+            logo.setAttribute('view', i);
+            logo.style.backgroundImage = `url("${fpdb.images}/Logos/${fpdb.list[i].id.substring(0, 2)}/${fpdb.list[i].id.substring(2, 4)}/${fpdb.list[i].id}.png?type=jpg")`;
+            logo.addEventListener('click', loadEntry);
+            entry.append(logo);
+        }
         
         let text = document.createElement('div');
         text.className = 'entry-text';
@@ -254,7 +270,7 @@ function loadPage(page) {
         header.append(title, developer);
         subHeader.append(type, tags);
         text.append(header, subHeader, description);
-        entry.append(logo, text);
+        entry.append(text);
         htmlList.append(entry);
     }
 }
