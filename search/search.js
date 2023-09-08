@@ -2,7 +2,6 @@ let fpdb = {
     api: 'https://db-api.unstable.life',
     images: 'https://infinity.unstable.life/images',
     resultsPerPage: 100,
-    thumbnailLimit: 1000,
     metaMap: {
         title:               "Title",
         alternateTitles:     "Alternate Titles",
@@ -216,18 +215,25 @@ function loadPage(page) {
     document.querySelectorAll('.results-current-page').forEach(elem => { elem.textContent = fpdb.currentPage.toLocaleString(); });
     document.querySelector('.results').scrollTop = 0;
     
+    let logoObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.backgroundImage = entry.target.getAttribute('lazy-background');
+                logoObserver.unobserve(entry.target);
+            }
+        });
+    });
+    
     for (let i = (page - 1) * fpdb.displayedResults; i < Math.min(fpdb.list.length, page * fpdb.displayedResults); i++) {
         let entry = document.createElement('div')
         entry.className = 'entry';
         
-        if (fpdb.displayedResults < fpdb.thumbnailLimit) {
-            let logo = document.createElement('div');
-            logo.className = 'entry-logo';
-            logo.setAttribute('view', i);
-            logo.style.backgroundImage = `url("${fpdb.images}/Logos/${fpdb.list[i].id.substring(0, 2)}/${fpdb.list[i].id.substring(2, 4)}/${fpdb.list[i].id}.png?type=jpg")`;
-            logo.addEventListener('click', loadEntry);
-            entry.append(logo);
-        }
+        let logo = document.createElement('div');
+        logo.className = 'entry-logo';
+        logo.setAttribute('view', i);
+        logo.setAttribute('lazy-background', `url("${fpdb.images}/Logos/${fpdb.list[i].id.substring(0, 2)}/${fpdb.list[i].id.substring(2, 4)}/${fpdb.list[i].id}.png?type=jpg")`);
+        logo.addEventListener('click', loadEntry);
+        logoObserver.observe(logo);
         
         let text = document.createElement('div');
         text.className = 'entry-text';
@@ -271,7 +277,7 @@ function loadPage(page) {
         header.append(title, developer);
         subHeader.append(type, tags);
         text.append(header, subHeader, description);
-        entry.append(text);
+        entry.append(logo, text);
         htmlList.append(entry);
     }
 }
