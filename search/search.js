@@ -5,6 +5,7 @@ let fpdb = {
     metaMap: {
         title:               "Title",
         alternateTitles:     "Alternate Titles",
+        series:              "Series",
         developer:           "Developer",
         publisher:           "Publisher",
         source:              "Source",

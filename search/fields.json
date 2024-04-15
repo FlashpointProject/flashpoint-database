@@ -15,6 +15,11 @@
     "values": []
   },
   {
+    "name": "series",
+    "displayName": "Series",
+    "values": []
+  },
+  {
     "name": "developer",
     "displayName": "Developer",
     "values": []
@@ -106,6 +111,16 @@
   {
     "name": "language",
     "displayName": "Language",
+    "values": []
+  },
+  {
+    "name": "notes",
+    "displayName": "Notes",
+    "values": []
+  },
+  {
+    "name": "originalDescription",
+    "displayName": "Original Description",
     "values": []
   },
   {
