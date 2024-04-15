@@ -1,6 +1,7 @@
 let fpdb = {
     api: 'https://db-api.unstable.life',
     images: 'https://infinity.unstable.life/images',
+    icons: 'https://unstable.life/updater-data/12-1/Data/Logos/',
     resultsPerPage: 100,
     metaMap: {
         title:               "Title",
@@ -69,9 +70,6 @@ fetch('fields.json').then(r => r.json()).then(async json => {
 
 fetch('sort.json').then(r => r.json()).then(json => {
     fpdb.sortOptions = json;
-    
-    let options = document.querySelector('.results-sort-options'),
-        direction = document.querySelector('.results-sort-direction');
     
     for (let sort of json) {
         let opt = document.createElement('option');
@@ -225,22 +223,12 @@ function loadPage(page) {
     });
     
     for (let i = (page - 1) * fpdb.displayedResults; i < Math.min(fpdb.list.length, page * fpdb.displayedResults); i++) {
-        let entry = document.createElement('div')
+        let compact = document.querySelector('#compact').checked;
+
+        let entry = document.createElement('div');
         entry.className = 'entry';
-        
-        let logo = document.createElement('div');
-        logo.className = 'entry-logo';
-        logo.setAttribute('view', i);
-        logo.setAttribute('lazy-background', `url("${fpdb.images}/Logos/${fpdb.list[i].id.substring(0, 2)}/${fpdb.list[i].id.substring(2, 4)}/${fpdb.list[i].id}.png?type=jpg")`);
-        logo.addEventListener('click', loadEntry);
-        logoObserver.observe(logo);
-        
-        let text = document.createElement('div');
-        text.className = 'entry-text';
-        
-        let header = document.createElement('div'),
-            subHeader = document.createElement('div');
-        
+        if (compact) entry.setAttribute('compact', 'true');
+
         let title = document.createElement('a');
         title.classList.add('entry-title', 'common-activate');
         title.setAttribute('view', i);
@@ -255,29 +243,61 @@ function loadPage(page) {
             developer.textContent = ' by ' + fpdb.list[i].publisher;
         else
             developer.hidden = true;
-        
-        let type = document.createElement('span');
-        type.className = 'entry-type';
-        type.textContent = fpdb.list[i].platform.replace(/; /g, '/') + (fpdb.list[i].library == 'arcade' ? ' game' : ' animation');
-        
+
         let tags = document.createElement('span');
         tags.className = 'entry-tags';
-        tags.textContent = ' - ' + fpdb.list[i].tags.join(' - ');
+        if (compact)
+            tags.textContent = fpdb.list[i].tags.join(', ');
+        else
+            tags.textContent = '\u00A0- ' + fpdb.list[i].tags.join(' - ');
         
         let description = document.createElement('div');
         description.className = 'entry-description';
         if (fpdb.list[i].originalDescription != '')
             description.textContent = fpdb.list[i].originalDescription;
-        else {
-            description.textContent = 'No description.'
-            description.style.color = '#000a';
-            description.style.fontStyle = 'italic';
+        else if (!compact) {
+            description.textContent = 'No description.';
+            description.setAttribute('empty', 'true');
         }
         
-        header.append(title, developer);
-        subHeader.append(type, tags);
-        text.append(header, subHeader, description);
-        entry.append(logo, text);
+        if (compact) {
+            let platform = document.createElement('div');
+            platform.className = 'entry-platform';
+            let platformName = fpdb.list[i].platform.split('; ')[0];
+            platform.style.backgroundImage = 'url("' + fpdb.icons + platformName + '.png")';
+            platform.setAttribute('title', platformName);
+
+            let library = document.createElement('div');
+            library.className = 'entry-library';
+            library.style.backgroundImage = 'url("' + (fpdb.list[i].library == 'arcade' ? 'game.png' : 'animation.png') + '")';
+            library.setAttribute('title', fpdb.list[i].library == 'arcade' ? 'Game' : 'Animation');
+            
+            entry.append(platform, library, title, developer, description, tags);
+        }
+        else {
+            let logo = document.createElement('div');
+            logo.className = 'entry-logo';
+            logo.setAttribute('view', i);
+            logo.setAttribute('lazy-background', `url("${fpdb.images}/Logos/${fpdb.list[i].id.substring(0, 2)}/${fpdb.list[i].id.substring(2, 4)}/${fpdb.list[i].id}.png?type=jpg")`);
+            logo.addEventListener('click', loadEntry);
+            logoObserver.observe(logo);
+            
+            let text = document.createElement('div');
+            text.className = 'entry-text';
+            
+            let header = document.createElement('div'),
+            subHeader = document.createElement('div');
+
+            let type = document.createElement('span');
+            type.className = 'entry-type';
+            type.textContent = fpdb.list[i].platform.replace(/; /g, '/') + (fpdb.list[i].library == 'arcade' ? ' game' : ' animation');
+
+            header.append(title, developer);
+            subHeader.append(type, tags);
+            text.append(header, subHeader, description);
+            entry.append(logo, text);
+        }
+        
         htmlList.append(entry);
     }
 }
@@ -434,6 +454,8 @@ function backToResults() {
 }
 
 document.querySelector('.search-button').addEventListener('click', performSearch);
+
+document.querySelector('#compact').addEventListener('change', () => loadPage(fpdb.currentPage));
 
 document.querySelectorAll('.results-first-page').forEach(elem => elem.addEventListener('click', () => { if (fpdb.currentPage > 1) loadPage(1); }));
 document.querySelectorAll('.results-back-page').forEach(elem => elem.addEventListener('click', () => { if (fpdb.currentPage > 1) loadPage(fpdb.currentPage - 1); }));

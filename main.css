@@ -250,7 +250,7 @@ body {
     font-weight: bold;
 }
 .results-navigate {
-    margin-left: 24px;
+    margin-left: 1.2rem;
 }
 .results-per-page {
     font-size: 0.7rem;
@@ -259,18 +259,25 @@ body {
     width: 2rem !important;
     margin-left: 0.5rem;
 }
+.results-compact {
+    position: absolute;
+    top: 2rem; right: 0;
+}
 .results-bottom {
     text-align: right;
     margin-top: 0.5rem;
 }
 
 .entry {
-    height: 6rem;
     padding: 0.5rem 0;
     border-bottom: 0.15rem solid #0002;
     display: flex;
 }
-.entry-logo {
+
+.entry:not([compact]) {
+    height: 6rem;
+}
+.entry:not([compact]) .entry-logo {
     height: 100%;
     background-position: center;
     background-repeat: no-repeat;
@@ -279,7 +286,7 @@ body {
     flex: 0 0 8rem;
     cursor: pointer;
 }
-.entry-text {
+.entry:not([compact]) .entry-text {
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -287,24 +294,70 @@ body {
     white-space: nowrap;
     overflow: hidden;
 }
-.entry-title {
+.entry:not([compact]) .entry-title {
     font-family: Tahoma, sans-serif;
     font-size: 1.5rem;
 }
-.entry-developer {
+.entry:not([compact]) .entry-developer {
     font-size: 0.7rem;
     margin-left: 0.1rem;
 }
-.entry-type,
-.entry-tags {
+.entry:not([compact]) .entry-type,
+.entry:not([compact]) .entry-tags {
     font-size: 0.9rem;
 }
-.entry-tags {
+.entry:not([compact]) .entry-tags {
     color: #000a;
 }
-.entry-description {
+.entry:not([compact]) .entry-description {
     margin-top: 0.5rem;
     white-space: normal;
+}
+.entry:not([compact]) .entry-description[empty] {
+    color: #000a;
+    font-style: italic;
+}
+
+.entry[compact] {
+    height: 1rem;
+    overflow: hidden;
+    align-items: center;
+}
+.entry[compact] :not(.entry-platform, .entry-library) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.entry[compact] :not(.entry-title) {
+    font-size: 0.7rem;
+}
+.entry[compact] :not(.entry-description) {
+    flex-shrink: 0;
+}
+.entry[compact] .entry-platform,
+.entry[compact] .entry-library {
+    width: 1.2rem;
+    height: 1.2rem;
+    background-size: contain;
+    background-repeat: no-repeat;
+    padding-right: 0.2rem;
+}
+.entry[compact] .entry-title {
+    font-size: 0.9rem;
+    padding: 0 0.5rem 0 0.2rem;
+    max-width: calc(40% - 2.8rem);
+}
+.entry[compact] .entry-developer {
+    padding-right: 0.5rem;
+    max-width: calc(25% - 2.8rem);
+}
+.entry[compact] .entry-description {
+    color: #000a;
+    flex-grow: 1;
+}
+.entry[compact] .entry-tags {
+    padding-left: 0.5rem;
+    max-width: calc(35% - 2.8rem);
 }
 
 .viewer {
