@@ -1,7 +1,7 @@
 let fpdb = {
     api: 'https://db-api.unstable.life',
     images: 'https://infinity.unstable.life/images',
-    icons: 'https://unstable.life/updater-data/12-1/Data/Logos/',
+    icons: 'https://flashpointproject.github.io/flashpoint-database-logos/',
     resultsPerPage: 100,
     metaMap: {
         title:               "Title",

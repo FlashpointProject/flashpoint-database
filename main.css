@@ -339,6 +339,7 @@ body {
     width: 1.2rem;
     height: 1.2rem;
     background-size: contain;
+    background-position: center;
     background-repeat: no-repeat;
     padding-right: 0.2rem;
 }
