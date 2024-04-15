@@ -36,7 +36,7 @@ body {
     padding-right: 1rem !important;
 }
 .navbar-logo img {
-    filter: invert(1);
+    filter: grayscale(1) contrast(10) invert(1);
 }
 .navbar-logo span {
     padding-top: 0.1rem;
@@ -154,9 +154,6 @@ body {
     margin: 0 auto;
     display: flex;
     gap: 2rem;
-}
-.home-logo {
-    filter: invert(0.5) sepia(1) saturate(10000);
 }
 .home-text {
     margin: 0 auto;
