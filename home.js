@@ -10,3 +10,7 @@ function initializeSearch() {
 
 document.querySelector('.home-search-input').addEventListener('keyup', e => { if (e.key == 'Enter') initializeSearch(); });
 document.querySelector('.home-search-button').addEventListener('click', initializeSearch);
+function searchDeveloper(developer) {
+    const url = `search/?developer=${encodeURIComponent(developer)}`;
+    window.location.href = url;
+}
