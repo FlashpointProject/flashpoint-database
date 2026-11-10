@@ -1,12 +1,23 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <script>
+            const id = location.hash.substring(1);
+            if (/^[a-z0-9-]{36}$/.test(id))
+                location.href = 'https://flashpointarchive.org/view?id=' + id;
+            else
+                location.href = 'https://flashpointarchive.org/search';
+        </script>
+        <!--
         <title>Search - Flashpoint Database</title>
         <link rel="icon" href="../favicon.ico">
         <link rel="stylesheet" href="../main.css">
         <script defer src="search.js"></script>
+        -->
     </head>
     <body>
+        Redirecting you to the new search tool...
+        <!--
         <div class="navbar">
             <a href="../" class="navbar-logo">
                 <img src="../logo.svg" height="100%">
@@ -99,5 +110,6 @@
                 </div>
             </div>
         </div>
+        -->
     </body>
 </html>
